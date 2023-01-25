@@ -200,42 +200,6 @@ std::pair<A, B> make_pair( A t, B u )
 }
 
 template <typename T>
-class VecIterator 
-// : public ft::iterator<VecIterator_tag, T>
-{
-public:
-	// Member types
-	typedef std::random_access_iterator_tag iterator_category;
-	// Constructors
-	VecIterator() : m_ptr(nullptr) {}
-	VecIterator(T* ptr) : m_ptr(ptr) {}
-
-	// Member functions
-	T& operator*() const { return *m_ptr; }
-	T* operator->() const { return m_ptr; }
-	T& operator[](std::ptrdiff_t n) const { return *(m_ptr + n); }
-
-	VecIterator& operator++() { ++m_ptr; return *this; }
-	VecIterator operator++(int) { VecIterator tmp(*this); operator++(); return tmp; }
-	VecIterator& operator--() { --m_ptr; return *this; }
-	VecIterator operator--(int) { VecIterator tmp(*this); operator--(); return tmp; }
-
-	VecIterator& operator+=(std::ptrdiff_t n) { m_ptr += n; return *this; }
-	VecIterator& operator-=(std::ptrdiff_t n) { m_ptr -= n; return *this; }
-	VecIterator operator+(std::ptrdiff_t n) const { return VecIterator(m_ptr + n); }
-	VecIterator operator-(std::ptrdiff_t n) const { return VecIterator(m_ptr - n); }
-	std::ptrdiff_t operator-(const VecIterator& other) const { return m_ptr - other.m_ptr; }
-	bool operator<(const VecIterator& other) const { return m_ptr < other.m_ptr; }
-	bool operator<=(const VecIterator& other) const { return m_ptr <= other.m_ptr; }
-	bool operator>(const VecIterator& other) const { return m_ptr > other.m_ptr; }
-	bool operator>=(const VecIterator& other) const { return m_ptr >= other.m_ptr; }
-	bool operator==(const VecIterator& other) const { return m_ptr == other.m_ptr; }
-	bool operator!=(const VecIterator& other) const { return m_ptr != other.m_ptr; }
-private:
-	T* m_ptr;
-};
-
-template <typename T>
 class ReverseIterator {
 	public:
 		typedef T iterator_type;
@@ -248,6 +212,49 @@ class ReverseIterator {
 		ReverseIterator();
 		explicit ReverseIterator(iterator_type it);
 
+	};
+
+template <typename T>
+class MyIterator : public std::iterator<std::random_access_iterator_tag, T>
+{
+	public:
+		typedef typename std::random_access_iterator_tag iterator_category;
+	    typedef T value_type;
+	    typedef std::ptrdiff_t difference_type;
+		typedef T* pointer;
+		typedef T& reference;
+
+	    // constructor
+	    MyIterator(T* p) : _ptr(p) {}
+
+	    // increment/decrement operators
+	    MyIterator& operator++() { ++_ptr; return *this; }
+	    MyIterator& operator--() { --_ptr; return *this; }
+	    MyIterator operator++(int) { MyIterator tmp(*this); operator++(); return tmp; }
+	    MyIterator operator--(int) { MyIterator tmp(*this); operator--(); return tmp; }
+
+	    // arithmetic operators
+	    MyIterator operator+(difference_type n) const { return MyIterator(_ptr + n); }
+	    MyIterator operator-(difference_type n) const { return MyIterator(_ptr - n); }
+	    difference_type operator-(const MyIterator& rhs) const { return _ptr - rhs._ptr; }
+	    MyIterator& operator+=(difference_type n) { _ptr += n; return *this; }
+	    MyIterator& operator-=(difference_type n) { _ptr -= n; return *this; }
+
+	    // dereference operator
+	    T& operator*() const { return *_ptr; }
+	    T* operator->() const { return _ptr; }
+	    T& operator[](difference_type n) const { return _ptr[n]; }
+
+	    // comparison operators
+	    bool operator==(const MyIterator& rhs) const { return _ptr == rhs._ptr; }
+	    bool operator!=(const MyIterator& rhs) const { return _ptr != rhs._ptr; }
+	    bool operator<(const MyIterator& rhs) const { return _ptr < rhs._ptr; }
+	    bool operator>(const MyIterator& rhs) const { return _ptr > rhs._ptr; }
+	    bool operator<=(const MyIterator& rhs) const { return _ptr <= rhs._ptr; }
+		bool operator>=(const MyIterator& rhs) const { return _ptr >= rhs._ptr; }
+
+	private:
+		T* _ptr;
 	};
 }
 
