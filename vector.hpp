@@ -2,31 +2,46 @@
 # define FT_VECTOR_HPP
 #include <iostream>
 #include "iterator.hpp"
+#include <memory>
 
 namespace ft {
-template<typename _Tp, typename _Allocator = std::allocator<_Tp> >
-class vector:
+template<class T, class Allocator = std::allocator<T> >
+class vector
 {
 	public:
-		typedef _Tp												value_type;
-		typedef _Allocator										allocator_type;
+		typedef T												value_type;
+		typedef Allocator										allocator_type;
 		typedef typename	allocator_type::reference			reference;
 		typedef typename	allocator_type::const_reference 	const_reference;
 		typedef typename	allocator_type::pointer 			pointer;
 		typedef typename	allocator_type::const_pointer		const_pointer;
 
-		typedef MyIterator<value_type>						iterator;
-		typedef MyIterator<const value_type>				const_iterator;
-		// typedef VecIteratorRev<iterator>					reverse_iterator;
-		// typedef VecIteratorRev<const_iterator>				const_reverse_iterator;
+		typedef VecIterator<value_type>						iterator;
+		typedef VecIterator<const value_type>				const_iterator;
+		typedef VecRevIterator<iterator>					reverse_iterator;
+		typedef VecRevIterator<const_iterator>				const_reverse_iterator;
 
 		typedef std::size_t										size_type;
 		typedef std::ptrdiff_t									difference_type;
 
 		// Constructors
-		explicit vector (const allocator_type& alloc = allocator_type());
+		explicit vector (const allocator_type& alloc = allocator_type()) : _allocator(alloc)
+		{
+			_data = nullptr;
+			_size = 0;
+			_capacity = 0;
+			ReAlloc(2);
+		};
 	
-		explicit vector (size_type n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type());
+		explicit vector (size_type count, const value_type& val = value_type(), const allocator_type& alloc = allocator_type()) : _allocator(alloc)
+		{
+			_data = nullptr;
+			_size = count;
+			_capacity = count;
+			ReAlloc(count);
+			for (int x = 0; x < count; x++)
+				_data[x] = val;
+		};
 
 		// template <class InputIterator>
 		// vector (InputIterator first, typename enable_if<!is_integral<InputIterator>::value_type, InputIterator>::type last, const allocator_type &alloc = allocator_type());
@@ -40,11 +55,18 @@ class vector:
 		vector (const vector &copy);
 		
 		// Destructor
-		~vector() { }
+		~vector()
+		{
+			_allocator.deallocate(_data, _size);
+		}
 
 		// Accessor
 		vector &operator=(const vector& rhs)
-		{}
+		{
+			_allocator.deallocate(_data, _size);
+			_allocator.allocate(rhs.size);
+			// TODO, TRAVERSE THRU
+		}
 
 		// Iterators
 		iterator begin();
@@ -64,7 +86,7 @@ class vector:
 		const_reverse_iterator rend() const;
 
 		// Capacity
-		size_type size() const;
+		size_type size() const { return _size; };
 
 		size_type max_size() const;
 
@@ -77,9 +99,23 @@ class vector:
 		void reserve(size_type n);
 
 		//Element access
-		reference operator[] (size_type n);
+		reference operator[] (size_type n)
+		{
+			if (n >= _size)
+			{
+				throw (std::out_of_range("index out of range"));
+			}
+			return _data[n];
+		}
 
-		const_reference operator[](size_type n) const;
+		const_reference operator[](size_type n) const
+		{
+			if (n >= _size)
+			{
+				throw (std::out_of_range("index out of range"));
+			}
+			return _data[n];
+		}
 
 		reference at(size_type n);
 
@@ -103,7 +139,12 @@ class vector:
 
 		void assign (size_type n, const value_type &val);
 
-		void push_back (const value_type &val);
+		void push_back (const value_type &val)
+		{
+			if (_size >= _capacity)
+				ReAlloc(_capacity + _capacity / 2);
+			_data[_size++] = val;
+		}
 
 		void pop_back();
 
@@ -123,31 +164,52 @@ class vector:
 		void clear();
 
 		//Non member function overloads
-		template <class T, class Alloc>
+		template <class Tp, class Alloc>
 		friend bool operator==(const ft::vector<T, Alloc>&rhs,
 						const ft::vector<T, Alloc> &lhs);
 
-		template <class T, class Alloc>
+		template <class Tp, class Alloc>
 		friend bool operator!=(const std::vector<T, Alloc> &rhs,
 								const std::vector<T, Alloc> &lhs);
 
-		template <class T, class Alloc>
+		template <class Tp, class Alloc>
 		friend bool operator<(const std::vector<T, Alloc> &rhs,
 								const std::vector<T, Alloc> &lhs);
 		
-		template <class T, class Alloc>
+		template <class Tp, class Alloc>
 		friend bool operator<=(const std::vector<T, Alloc> &rhs,
 								const std::vector<T, Alloc> &lhs);
 
-		template <class T, class Alloc>
+		template <class Tp, class Alloc>
 		friend bool operator>(const std::vector<T, Alloc> &rhs,
 								const std::vector<T, Alloc> &lhs);
 
-		template <class T, class Alloc>
+		template <class Tp, class Alloc>
 		friend bool operator>=(const std::vector<T, Alloc> &rhs,
 								const std::vector<T, Alloc> &lhs);
 
+	private:
+		void ReAlloc(size_t newCapacity)
+		{
+			T* newBlock = _allocator.allocate(newCapacity);
 
+			size_t size = _size;
+			if (newCapacity < size)
+				_size = newCapacity;
+
+			for (size_t i = 0; i < _size; i++)
+				newBlock[i] = _data[i];
+
+			delete[] _data;
+			_data = newBlock;
+			_capacity = newCapacity;
+		}
+
+	private:
+		allocator_type _allocator;
+		pointer _data;
+		size_t _size;
+		size_t _capacity;
 
 
 };

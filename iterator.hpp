@@ -3,16 +3,6 @@
 
 #include <iostream>
 
-// std::iterator_traits
-// • std::reverse_iterator
-// • std::enable_if
-// Yes, it is C++11 but you will be able to implement it in a C++98 manner.
-// This is asked so you can discover SFINAE.
-// • std::is_integral
-// • std::equal and/or std::lexicographical_compare
-// • std::pair
-// • std::make_pair
-
 namespace ft
 {
 
@@ -49,18 +39,6 @@ class iterator_traits<const T*>
 	typedef typename  std::random_access_iterator_tag		iterator_category;
 };
 
-template <typename Iter>
-class reverse_iterator
-{
-	public:
-	typedef Iter													iterator_type;
-	typedef typename    iterator_traits<Iter>::iterator_category	iterator_category;
-	typedef typename    iterator_traits<Iter>::value_type			value_type;
-	typedef typename    iterator_traits<Iter>::difference_type		difference_type ;
-	typedef typename    iterator_traits<Iter>::pointer				pointer;
-	typedef typename    iterator_traits<Iter>::reference			reference;
-};
-
 template<bool B, class T = void>
 struct enable_if
 {
@@ -77,7 +55,7 @@ template <typename T>
 class is_integral
 {
 	public:
-	static const bool	value_type = std::numeric_limits<T>::is_integer;
+		static const bool	value_type = std::numeric_limits<T>::is_integer;
 };
 
 template<class InputIt1, class InputIt2>
@@ -98,21 +76,6 @@ bool lexicographical_compare(InputIt1 first1, InputIt1 last1,
 template<class InputIt1, class InputIt2, class Compare>
 bool lexicographical_compare(InputIt1 first1, InputIt1 last1,
     							InputIt2 first2, InputIt2 last2, Compare comp)
-{
-    for (; (first1 != last1) && (first2 != last2); ++first1, (void) ++first2)
-    {
-        if (comp(*first1, *first2))
-            return true;
-        if (comp(*first2, *first1))
-            return false;
-    }
- 
-    return (first1 == last1) && (first2 != last2);
-}
-
-template<class InputIt1, class InputIt2, class Compare>
-bool lexicographical_compare(InputIt1 first1, InputIt1 last1,
-                             InputIt2 first2, InputIt2 last2, Compare comp)
 {
     for (; (first1 != last1) && (first2 != last2); ++first1, (void) ++first2)
     {
@@ -200,22 +163,56 @@ std::pair<A, B> make_pair( A t, B u )
 }
 
 template <typename T>
-class ReverseIterator {
+class VecRevIterator : public std::iterator<std::random_access_iterator_tag, T>
+{
 	public:
 		typedef T iterator_type;
 		typedef typename ft::iterator_traits<T>::iterator_category iterator_category;
-		typedef typename ft::iterator_traits<T>::value_type value_type;
-		typedef typename ft::iterator_traits<T>::difference_type difference_type;
-		typedef typename ft::iterator_traits<T>::pointer pointer;
-		typedef typename ft::iterator_traits<T>::reference reference;
+	    typedef typename ft::iterator_traits<T>::value_type value_type;
+	    typedef typename ft::iterator_traits<T>::difference_type difference_type;
+	    typedef typename ft::iterator_traits<T>::pointer pointer;
+	    typedef typename ft::iterator_traits<T>::reference reference;
 
-		ReverseIterator();
-		explicit ReverseIterator(iterator_type it);
+	    // constructor
+	    VecRevIterator() : _ptr(nullptr) {};
 
-	};
+		explicit VecRevIterator( iterator_type x) : _ptr(x._ptr - 1) {};
+		
+		template<class U>
+		VecRevIterator(const VecRevIterator<U> &other) : _ptr(other._ptr) {};
+
+	    // increment/decrement operators
+	    VecRevIterator& operator++() { --_ptr; return *this; }
+	    VecRevIterator& operator--() { ++_ptr; return *this; }
+	    VecRevIterator operator++(int) { VecRevIterator tmp(*this); operator++(); return tmp; }
+	    VecRevIterator operator--(int) { VecRevIterator tmp(*this); operator--(); return tmp; }
+
+	    // arithmetic operators
+	    VecRevIterator operator+(difference_type n) const { return VecRevIterator(_ptr + n); }
+	    VecRevIterator operator-(difference_type n) const { return VecRevIterator(_ptr - n); }
+	    difference_type operator-(const VecRevIterator& rhs) const { return _ptr - rhs._ptr; }
+	    VecRevIterator& operator+=(difference_type n) { _ptr += n; return *this; }
+	    VecRevIterator& operator-=(difference_type n) { _ptr -= n; return *this; }
+
+	    // dereference operator
+	    T& operator*() const { return *_ptr; }
+	    T* operator->() const { return _ptr; }
+	    T& operator[](difference_type n) const { return _ptr[n]; }
+
+	    // comparison operators
+	    bool operator==(const VecRevIterator& rhs) const { return _ptr == rhs._ptr; }
+	    bool operator!=(const VecRevIterator& rhs) const { return _ptr != rhs._ptr; }
+	    bool operator<(const VecRevIterator& rhs) const { return _ptr < rhs._ptr; }
+	    bool operator>(const VecRevIterator& rhs) const { return _ptr > rhs._ptr; }
+	    bool operator<=(const VecRevIterator& rhs) const { return _ptr <= rhs._ptr; }
+		bool operator>=(const VecRevIterator& rhs) const { return _ptr >= rhs._ptr; }
+
+	private:
+		T* _ptr;
+};
 
 template <typename T>
-class MyIterator : public std::iterator<std::random_access_iterator_tag, T>
+class VecIterator : public std::iterator<std::random_access_iterator_tag, T>
 {
 	public:
 		typedef typename std::random_access_iterator_tag iterator_category;
@@ -225,20 +222,20 @@ class MyIterator : public std::iterator<std::random_access_iterator_tag, T>
 		typedef T& reference;
 
 	    // constructor
-	    MyIterator(T* p) : _ptr(p) {}
+	    VecIterator(pointer p) : _ptr(p) {}
 
 	    // increment/decrement operators
-	    MyIterator& operator++() { ++_ptr; return *this; }
-	    MyIterator& operator--() { --_ptr; return *this; }
-	    MyIterator operator++(int) { MyIterator tmp(*this); operator++(); return tmp; }
-	    MyIterator operator--(int) { MyIterator tmp(*this); operator--(); return tmp; }
+	    VecIterator& operator++() { ++_ptr; return *this; }
+	    VecIterator& operator--() { --_ptr; return *this; }
+	    VecIterator operator++(int) { VecIterator tmp(*this); operator++(); return tmp; }
+	    VecIterator operator--(int) { VecIterator tmp(*this); operator--(); return tmp; }
 
 	    // arithmetic operators
-	    MyIterator operator+(difference_type n) const { return MyIterator(_ptr + n); }
-	    MyIterator operator-(difference_type n) const { return MyIterator(_ptr - n); }
-	    difference_type operator-(const MyIterator& rhs) const { return _ptr - rhs._ptr; }
-	    MyIterator& operator+=(difference_type n) { _ptr += n; return *this; }
-	    MyIterator& operator-=(difference_type n) { _ptr -= n; return *this; }
+	    VecIterator operator+(difference_type n) const { return VecIterator(_ptr + n); }
+	    VecIterator operator-(difference_type n) const { return VecIterator(_ptr - n); }
+	    difference_type operator-(const VecIterator& rhs) const { return _ptr - rhs._ptr; }
+	    VecIterator& operator+=(difference_type n) { _ptr += n; return *this; }
+	    VecIterator& operator-=(difference_type n) { _ptr -= n; return *this; }
 
 	    // dereference operator
 	    T& operator*() const { return *_ptr; }
@@ -246,16 +243,16 @@ class MyIterator : public std::iterator<std::random_access_iterator_tag, T>
 	    T& operator[](difference_type n) const { return _ptr[n]; }
 
 	    // comparison operators
-	    bool operator==(const MyIterator& rhs) const { return _ptr == rhs._ptr; }
-	    bool operator!=(const MyIterator& rhs) const { return _ptr != rhs._ptr; }
-	    bool operator<(const MyIterator& rhs) const { return _ptr < rhs._ptr; }
-	    bool operator>(const MyIterator& rhs) const { return _ptr > rhs._ptr; }
-	    bool operator<=(const MyIterator& rhs) const { return _ptr <= rhs._ptr; }
-		bool operator>=(const MyIterator& rhs) const { return _ptr >= rhs._ptr; }
+	    bool operator==(const VecIterator& rhs) const { return _ptr == rhs._ptr; }
+	    bool operator!=(const VecIterator& rhs) const { return _ptr != rhs._ptr; }
+	    bool operator<(const VecIterator& rhs) const { return _ptr < rhs._ptr; }
+	    bool operator>(const VecIterator& rhs) const { return _ptr > rhs._ptr; }
+	    bool operator<=(const VecIterator& rhs) const { return _ptr <= rhs._ptr; }
+		bool operator>=(const VecIterator& rhs) const { return _ptr >= rhs._ptr; }
 
 	private:
 		T* _ptr;
-	};
+};
 }
 
 #endif

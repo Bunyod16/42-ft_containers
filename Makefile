@@ -1,4 +1,4 @@
-NAME = span
+NAME = ft_containers
 SOURCES = main.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
