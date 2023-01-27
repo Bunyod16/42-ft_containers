@@ -36,11 +36,11 @@ class vector
 		explicit vector (size_type count, const value_type& val = value_type(), const allocator_type& alloc = allocator_type()) : _allocator(alloc)
 		{
 			_data = nullptr;
-			_size = count;
-			_capacity = count;
+			_size = 0;
+			_capacity = 0;
 			ReAlloc(count);
-			for (int x = 0; x < count; x++)
-				_data[x] = val;
+			for (unsigned int x = 0; x < _capacity; x++)
+				push_back(val);
 		};
 
 		// template <class InputIterator>
@@ -49,8 +49,8 @@ class vector
 		// template <class InputIterator>
 		// vector (InputIterator first, InputIterator last, const allocator_type &alloc = allocator_type(), typename enable_if<!is_integral<InputIterator>::value_type, void>::type* = nullptr);
 
-		template <class InputIterator>
-		vector (InputIterator first, InputIterator last, const allocator_type &alloc = allocator_type());
+		// template <class InputIterator>
+		// vector (InputIterator first, InputIterator last, const allocator_type &alloc = allocator_type());
 		
 		vector (const vector &copy);
 		
@@ -69,13 +69,25 @@ class vector
 		}
 
 		// Iterators
-		iterator begin();
+		iterator begin()
+		{
+			return _data;
+		}
 
-		const_iterator begin() const;
+		const_iterator begin() const
+		{
+			return _data;
+		}
 
-		iterator end();
+		iterator end()
+		{
+			return _data + _size;
+		}
 
-		const_iterator end() const;
+		const_iterator end() const
+		{
+			return _data + _size;
+		}
 
 		reverse_iterator rbegin();
 		
