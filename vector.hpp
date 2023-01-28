@@ -5,6 +5,13 @@
 #include <memory>
 
 namespace ft {
+
+template <typename G>
+bool comp(G a, G b)
+{
+	return (a == b);
+}
+
 template<class T, class Allocator = std::allocator<T> >
 class vector
 {
@@ -27,32 +34,42 @@ class vector
 		// Constructors
 		explicit vector (const allocator_type& alloc = allocator_type()) : _allocator(alloc)
 		{
-			_data = nullptr;
 			_size = 0;
-			_capacity = 0;
-			ReAlloc(2);
+			Alloc(2);
 		};
 	
 		explicit vector (size_type count, const value_type& val = value_type(), const allocator_type& alloc = allocator_type()) : _allocator(alloc)
 		{
-			_data = nullptr;
 			_size = 0;
-			_capacity = 0;
-			ReAlloc(count);
+			Alloc(count);
 			for (unsigned int x = 0; x < _capacity; x++)
 				push_back(val);
 		};
 
-		// template <class InputIterator>
-		// vector (InputIterator first, typename enable_if<!is_integral<InputIterator>::value_type, InputIterator>::type last, const allocator_type &alloc = allocator_type());
+		//enable_if is here because otherwise when you want to use something like vector(10, 100) to fill it up, it will match with the constructor below
+		template <class InputIterator>
+		vector (InputIterator first, typename enable_if<!is_integral<InputIterator>::value_type, InputIterator>::type last, const allocator_type &alloc = allocator_type()) : _allocator(alloc)
+		{
+			_size = 0;
+			Alloc(2);
+			for(; first != last; first++)
+			{
+				push_back(*first);
+			}
+		}
 		
-		// template <class InputIterator>
-		// vector (InputIterator first, InputIterator last, const allocator_type &alloc = allocator_type(), typename enable_if<!is_integral<InputIterator>::value_type, void>::type* = nullptr);
+		vector (const vector &copy)
+		{
+			_size = 0;
+			Alloc(2);
+			vector::const_iterator beg = copy.begin();
+			vector::const_iterator end = copy.end();
 
-		// template <class InputIterator>
-		// vector (InputIterator first, InputIterator last, const allocator_type &alloc = allocator_type());
-		
-		vector (const vector &copy);
+			for(; beg != end; beg++)
+			{
+				push_back(*beg);
+			}
+		}
 		
 		// Destructor
 		~vector()
@@ -71,31 +88,43 @@ class vector
 		// Iterators
 		iterator begin()
 		{
-			return _data;
+			return (iterator(_data));
 		}
 
 		const_iterator begin() const
 		{
-			return _data;
+			return (const_iterator(_data));
 		}
 
 		iterator end()
 		{
-			return _data + _size;
+			return (iterator(begin() + _size));
 		}
 
 		const_iterator end() const
 		{
-			return _data + _size;
+			return (const_iterator(begin() + _size));
 		}
 
-		reverse_iterator rbegin();
+		reverse_iterator rbegin()
+		{
+			return (reverse_iterator(begin() + _size));
+		}
 		
-		const_reverse_iterator rbegin() const;
+		const_reverse_iterator rbegin() const
+		{
+			return (const_reverse_iterator(begin() + _size));
+		}
 
-		reverse_iterator rend();
-		
-		const_reverse_iterator rend() const;
+		reverse_iterator rend()
+		{
+			return (reverse_iterator(begin()));
+		}
+
+		const_reverse_iterator rend() const
+		{
+			return (const_reverse_iterator(begin()));
+		}
 
 		// Capacity
 		size_type size() const { return _size; };
@@ -153,8 +182,9 @@ class vector
 
 		void push_back (const value_type &val)
 		{
-			if (_size >= _capacity)
+			if (_size >= _capacity) {
 				ReAlloc(_capacity + _capacity / 2);
+			}
 			_data[_size++] = val;
 		}
 
@@ -176,31 +206,46 @@ class vector
 		void clear();
 
 		//Non member function overloads
-		template <class Tp, class Alloc>
-		friend bool operator==(const ft::vector<T, Alloc>&rhs,
-						const ft::vector<T, Alloc> &lhs);
+	
+		template <class _Tp, class _Alloc>
+		friend bool operator==(const vector<_Tp, _Alloc>&rhs,
+						const vector<_Tp, _Alloc> &lhs)
+		{
+			if (lhs._size == rhs._size)
+				return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), ft::comp<typename vector<_Tp, _Alloc>::value_type>);
+			return false;
+		}
 
-		template <class Tp, class Alloc>
-		friend bool operator!=(const std::vector<T, Alloc> &rhs,
-								const std::vector<T, Alloc> &lhs);
+		template <class _Tp, class _Alloc>
+		friend bool operator!=(const vector<_Tp, _Alloc> &rhs,
+								const vector<_Tp, _Alloc> &lhs)
+		{
+			return (!(rhs == lhs));
+		}
 
-		template <class Tp, class Alloc>
-		friend bool operator<(const std::vector<T, Alloc> &rhs,
-								const std::vector<T, Alloc> &lhs);
+		template <class _Tp, class _Alloc>
+		friend bool operator<(const vector<_Tp, _Alloc> &rhs,
+								const vector<_Tp, _Alloc> &lhs);
 		
-		template <class Tp, class Alloc>
-		friend bool operator<=(const std::vector<T, Alloc> &rhs,
-								const std::vector<T, Alloc> &lhs);
+		template <class _Tp, class _Alloc>
+		friend bool operator<=(const vector<_Tp, _Alloc> &rhs,
+								const vector<_Tp, _Alloc> &lhs);
 
-		template <class Tp, class Alloc>
-		friend bool operator>(const std::vector<T, Alloc> &rhs,
-								const std::vector<T, Alloc> &lhs);
+		template <class _Tp, class _Alloc>
+		friend bool operator>(const vector<_Tp, _Alloc> &rhs,
+								const vector<_Tp, _Alloc> &lhs);
 
-		template <class Tp, class Alloc>
-		friend bool operator>=(const std::vector<T, Alloc> &rhs,
-								const std::vector<T, Alloc> &lhs);
+		template <class _Tp, class _Alloc>
+		friend bool operator>=(const vector<_Tp, _Alloc> &rhs,
+								const vector<_Tp, _Alloc> &lhs);
 
 	private:
+		void Alloc(size_t initCapacity)
+		{
+			_data = _allocator.allocate(initCapacity);
+			_capacity = initCapacity;
+		}
+		
 		void ReAlloc(size_t newCapacity)
 		{
 			T* newBlock = _allocator.allocate(newCapacity);
