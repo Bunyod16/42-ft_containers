@@ -74,7 +74,7 @@ class vector
 		// Destructor
 		~vector()
 		{
-			_allocator.deallocate(_data, _size);
+			_allocator.deallocate(_data, _capacity);
 		}
 
 		// Accessor
@@ -127,17 +127,41 @@ class vector
 		}
 
 		// Capacity
-		size_type size() const { return _size; };
+		size_type size() const
+		{
+			return _size; 
+		};
+		
+		size_type max_size() const
+		{
+			if (std::is_same<T, char>::value || std::is_same<T, unsigned char>::value) { return 9223372036854775807; }
 
-		size_type max_size() const;
+			return (_allocator.max_size());
+		}
 
-		void resize (size_type n, value_type val = value_type());
+		void resize (size_type n, value_type val = value_type())
+		{
+			if (n < _size)
+				for (; n != _size; pop_back());
+			else if (n > _size)
+				for (; n != _size; push_back(val));
+		}
+		
+		size_type capacity() const
+		{
+			return _capacity;
+		}
 
-		size_type capacity() const;
+		bool empty() const
+		{
+			return (_size == 0 ? true : false);
+		}
 
-		bool empty() const;
-
-		void reserve(size_type n);
+		void reserve(size_type n)
+		{
+			if (n > _capacity)
+				ReAlloc(n);
+		}
 
 		//Element access
 		reference operator[] (size_type n)
@@ -158,9 +182,19 @@ class vector
 			return _data[n];
 		}
 
-		reference at(size_type n);
+		reference at(size_type n)
+		{
+			if (n >= _size)
+				throw (std::out_of_range("index out of range"));
+			return _data[n];
+		}
 
-		const_reference at(size_type n) const;
+		const_reference at(size_type n) const
+		{
+			if (n >= _size)
+				throw (std::out_of_range("index out of range"));
+			return _data[n];
+		}
 
 		reference front();
 
@@ -188,7 +222,11 @@ class vector
 			_data[_size++] = val;
 		}
 
-		void pop_back();
+		void pop_back()
+		{
+			if (!empty())
+				_size--;
+		}
 
 		iterator insert (iterator position, const value_type &val);
 		
@@ -211,16 +249,26 @@ class vector
 		friend bool operator==(const vector<_Tp, _Alloc>&rhs,
 						const vector<_Tp, _Alloc> &lhs)
 		{
-			if (lhs._size == rhs._size)
-				return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), ft::comp<typename vector<_Tp, _Alloc>::value_type>);
-			return false;
+			if (lhs._size != rhs._size)
+				return false;
+			for (unsigned int i = 0; i < lhs.size(); i++) {
+                if (lhs.at(i) != rhs.at(i))
+					return false;
+            }
+            return true;
 		}
 
 		template <class _Tp, class _Alloc>
 		friend bool operator!=(const vector<_Tp, _Alloc> &rhs,
 								const vector<_Tp, _Alloc> &lhs)
 		{
-			return (!(rhs == lhs));
+			if (lhs._size != rhs._size)
+				return true;
+			for (unsigned int i = 0; i < lhs.size(); i++) {
+                if (lhs.at(i) != rhs.at(i))
+					return true;
+            }
+            return false;
 		}
 
 		template <class _Tp, class _Alloc>
@@ -270,5 +318,6 @@ class vector
 
 
 };
+
 }
 #endif

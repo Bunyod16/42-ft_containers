@@ -131,12 +131,12 @@ TEST_CASE("Copy constructor") {
 }
 
 TEST_CASE("Operators") {
-    // std::vector<int> stdvec(10, 100);
-    // std::vector<int> stdvec2(10, 100);
+    std::vector<int> stdvec(10, 100);
+    std::vector<int> stdvec2(10, 100);
 
-    // CHECK(stdvec == stdvec2);
-    // stdvec[0] = 0;
-    // CHECK(stdvec != stdvec2);
+    CHECK(stdvec == stdvec2);
+    stdvec[0] = 0;
+    CHECK(stdvec != stdvec2);
 
     ft::vector<int> ftvec(10, 100);
     ft::vector<int> ftvec2(10, 100);
@@ -144,4 +144,141 @@ TEST_CASE("Operators") {
     CHECK(ftvec == ftvec2);
     ftvec[0] = 0;
     CHECK(ftvec != ftvec2);
+    ftvec[0] = 100;
+    CHECK(ftvec == ftvec2);
+
+    ft::vector<int> ftvecempt;
+    CHECK(ftvec != ftvecempt);
+    CHECK(!(ftvec == ftvecempt));
+}
+
+TEST_CASE("at") {
+    std::vector<int> stdvec;
+
+    stdvec.push_back(1);
+    stdvec.push_back(2);
+    stdvec.push_back(3);
+    CHECK(stdvec.at(0) == 1);
+    CHECK(stdvec.at(1) == 2);
+    CHECK(stdvec.at(2) == 3);
+
+    ft::vector<int> ftvec;
+
+    ftvec.push_back(1);
+    ftvec.push_back(2);
+    ftvec.push_back(3);
+    CHECK(ftvec.at(0) == 1);
+    CHECK(ftvec.at(1) == 2);
+    CHECK(ftvec.at(2) == 3);
+}
+
+TEST_CASE("max_size") {
+    {
+        std::vector<int> stdvec;
+        ft::vector<int> ftvec;
+
+        CHECK(ftvec.max_size() == stdvec.max_size());
+    }
+    {
+        std::vector<char> stdvec;
+        ft::vector<char> ftvec;
+
+        CHECK((ftvec.max_size()) == stdvec.max_size());
+    }
+    {
+        std::vector<std::string> stdvec;
+        ft::vector<std::string> ftvec;
+
+        CHECK(ftvec.max_size() == stdvec.max_size());
+    }
+    {
+        std::vector<char **> stdvec;
+        ft::vector<char **> ftvec;
+
+        CHECK(ftvec.max_size() == stdvec.max_size());
+    }
+    {
+        std::vector<unsigned char **> stdvec;
+        ft::vector<unsigned char **> ftvec;
+
+        CHECK(ftvec.max_size() == stdvec.max_size());
+    }
+    {
+        std::vector<double> stdvec;
+        ft::vector<double> ftvec;
+
+        CHECK(ftvec.max_size() == stdvec.max_size());
+    }
+    {
+        std::vector<float> stdvec;
+        ft::vector<float> ftvec;
+
+        CHECK(ftvec.max_size() == stdvec.max_size());
+    }
+}
+
+TEST_CASE("pop_back") {
+    std::vector<int> stdvec;
+
+    stdvec.push_back(1);
+    stdvec.push_back(2);
+    stdvec.push_back(3);
+    CHECK(stdvec.at(stdvec.size() - 1) == 3);
+    stdvec.pop_back();
+    CHECK(stdvec.at(stdvec.size() - 1) == 2);
+    stdvec.pop_back();
+    CHECK(stdvec.at(stdvec.size() - 1) == 1);
+    stdvec.pop_back();
+    CHECK(stdvec.empty());
+
+    ft::vector<int> ftvec;
+
+    ftvec.push_back(1);
+    ftvec.push_back(2);
+    ftvec.push_back(3);
+    CHECK(ftvec.at(ftvec.size() - 1) == 3);
+    ftvec.pop_back();
+    CHECK(ftvec.at(ftvec.size() - 1) == 2);
+    ftvec.pop_back();
+    CHECK(ftvec.at(ftvec.size() - 1) == 1);
+    ftvec.pop_back();
+    CHECK(ftvec.empty());
+
+}
+
+
+TEST_CASE("resize") {
+    std::vector<int> stdvec(10, 100);
+    std::vector<int> stdvec2(5, 100);
+
+    stdvec.resize(5);
+    CHECK(stdvec == stdvec2);
+    stdvec.resize(4);
+    CHECK(stdvec != stdvec2);
+    stdvec.resize(10, 100);
+    stdvec2.resize(10, 100);
+    CHECK(stdvec == stdvec2);
+
+    ft::vector<int> ftvec(10, 100);
+    ft::vector<int> ftvec2(5, 100);
+
+    ftvec.resize(5);
+    CHECK(ftvec == ftvec2);
+    ftvec.resize(4);
+    CHECK(ftvec != ftvec2);
+    ftvec.resize(10, 100);
+    ftvec2.resize(10, 100);
+    CHECK(ftvec == ftvec2);
+
+}
+
+TEST_CASE("reserver") {
+    std::vector<int> stdvec(10, 100);
+    stdvec.reserve(50);
+    CHECK(stdvec.capacity() == 50);
+
+
+    ft::vector<int> ftvec(10, 100);
+    ftvec.reserve(50);
+    CHECK(ftvec.capacity() == 50);
 }
