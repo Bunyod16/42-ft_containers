@@ -248,6 +248,8 @@ class vector
 
 		iterator insert (iterator position, const value_type &val)
 		{
+    //TODO INSERT
+
 			*position++ = val;
 			return position;
 		}

@@ -309,13 +309,17 @@ TEST_CASE("back") {
 
 TEST_CASE("insert 1") {
     std::vector<int> stdvec(2, 10);
-    std::cout << stdvec[0] << " " << stdvec[1] << std::endl;
     stdvec.insert(stdvec.begin(), 55);
-    std::cout << stdvec[0] << " " << stdvec[1] << std::endl;
-    CHECK(stdvec[0] == 55);
-    stdvec.insert(++stdvec.begin(), 55);
-    std::cout << stdvec[0] << " " << stdvec[1] << std::endl;
-    CHECK(stdvec[1] == 55);
+    stdvec.insert(stdvec.end(), 55);
+    stdvec.insert(stdvec.begin() + 2, 55);
+    CHECK(stdvec.size() == 5);
+    CHECK(stdvec.at(0) == 55);
+    CHECK(stdvec.at(2) == 55);
+    CHECK(stdvec.at(4) == 55);
+
+
+    //TODO INSERT
+    std::copy(stdvec.begin(), stdvec.end(), std::ostream_iterator<int>(std::cout, " "));
 
     ft::vector<int> ftvec(2, 10);
     ftvec.insert(ftvec.begin(), 55);
