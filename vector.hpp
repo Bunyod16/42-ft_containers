@@ -134,7 +134,7 @@ class vector
 		
 		size_type max_size() const
 		{
-			if (std::is_same<T, char>::value || std::is_same<T, unsigned char>::value) { return 9223372036854775807; }
+			if (std::is_same<T, char>::value || std::is_same<T, unsigned char>::value) { return _allocator.max_size() / 2; }
 
 			return (_allocator.max_size());
 		}
@@ -196,17 +196,35 @@ class vector
 			return _data[n];
 		}
 
-		reference front();
+		reference front()
+		{
+			return (_data[0]);
+		}
 
-		const_reference front() const;
+		const_reference front() const
+		{
+			return (_data[0]);
+		}
 
-		reference back();
+		reference back()
+		{
+			return (_data[_size - 1]);
+		}
 
-		const_reference back() const;
+		const_reference back() const
+		{
+			return (_data[_size - 1]);
+		}
 
-		value_type *data();
+		value_type *data()
+		{
+			return _data;
+		}
 
-		const value_type *data() const;
+		const value_type *data() const
+		{
+			return _data;
+		}
 
 		// Modifiers
 		template <class InputIterator>
@@ -228,7 +246,11 @@ class vector
 				_size--;
 		}
 
-		iterator insert (iterator position, const value_type &val);
+		iterator insert (iterator position, const value_type &val)
+		{
+			*position++ = val;
+			return position;
+		}
 		
 		void insert (iterator position, size_type n, const value_type &val);
 

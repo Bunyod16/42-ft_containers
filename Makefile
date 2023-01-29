@@ -17,10 +17,10 @@ $(NAME): $(OBJECTS)
 	$(CC) -fsanitize=address -g3 -o $@ $^
 
 $(VECTORTEST): $(TESTDIR)/vector.o
-	$(CC) -fsanitize=address -g3 -o $@ $(notdir $^)
+	$(CC) $(CFLAGS) -fsanitize=address $^ -g3 -o $@
 
 %.o: %.cpp
-	$(CC) -c $(CFLAGS) $<
+	$(CC) -c $(CFLAGS) $< -o $@
 
 clean:
 	$(RM) $(OBJECTS)

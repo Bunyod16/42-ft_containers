@@ -272,7 +272,7 @@ TEST_CASE("resize") {
 
 }
 
-TEST_CASE("reserver") {
+TEST_CASE("reserve") {
     std::vector<int> stdvec(10, 100);
     stdvec.reserve(50);
     CHECK(stdvec.capacity() == 50);
@@ -281,4 +281,45 @@ TEST_CASE("reserver") {
     ft::vector<int> ftvec(10, 100);
     ftvec.reserve(50);
     CHECK(ftvec.capacity() == 50);
+}
+
+TEST_CASE("front") {
+    std::vector<int> stdvec(10, 10);
+    CHECK(stdvec.front() == 10);
+    stdvec[0] = 15;
+    CHECK(stdvec.front() == 15);
+
+    ft::vector<int> ftvec(10, 10);
+    CHECK(ftvec.front() == 10);
+    ftvec[0] = 15;
+    CHECK(ftvec.front() == 15);
+}
+
+TEST_CASE("back") {
+    std::vector<int> stdvec(10, 10);
+    CHECK(stdvec.back() == 10);
+    stdvec[9] = 15;
+    CHECK(stdvec.back() == 15);
+
+    ft::vector<int> ftvec(10, 10);
+    CHECK(ftvec.back() == 10);
+    ftvec[9] = 15;
+    CHECK(ftvec.back() == 15);
+}
+
+TEST_CASE("insert 1") {
+    std::vector<int> stdvec(2, 10);
+    std::cout << stdvec[0] << " " << stdvec[1] << std::endl;
+    stdvec.insert(stdvec.begin(), 55);
+    std::cout << stdvec[0] << " " << stdvec[1] << std::endl;
+    CHECK(stdvec[0] == 55);
+    stdvec.insert(++stdvec.begin(), 55);
+    std::cout << stdvec[0] << " " << stdvec[1] << std::endl;
+    CHECK(stdvec[1] == 55);
+
+    ft::vector<int> ftvec(2, 10);
+    ftvec.insert(ftvec.begin(), 55);
+    CHECK(ftvec[0] == 55);
+    ftvec.insert(++ftvec.begin(), 55);
+    CHECK(ftvec[1] == 55);
 }
