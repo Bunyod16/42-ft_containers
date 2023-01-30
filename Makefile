@@ -8,7 +8,7 @@ CFLAGS = -Wall -Wextra -Werror -std=c++98
 
 TESTDIR = test
 
-VECTORTEST = vtest
+VECTORTEST = v
 MAPTEST = mtest
 
 all: $(NAME)
@@ -16,13 +16,20 @@ all: $(NAME)
 $(NAME): $(OBJECTS)
 	$(CC) -fsanitize=address -g3 -o $@ $^
 
-$(VECTORTEST): $(TESTDIR)/vector.o
-	$(CC) $(CFLAGS) -fsanitize=address $^ -g3 -o $@
+$(VECTORTEST)ft: clean
+	$(CC) -c $(CFLAGS) $(TESTDIR)/vector.cpp -DNAME_SPACE=ft 
+	$(CC) $(CFLAGS) -fsanitize=address -DNAME_SPACE=ft $(TESTDIR)/vector.cpp -g3 -o $@ 
+
+$(VECTORTEST)std: clean
+	$(CC) -c $(CFLAGS) $(TESTDIR)/vector.cpp -DNAME_SPACE=std
+	$(CC) $(CFLAGS) -fsanitize=address -DNAME_SPACE=std $(TESTDIR)/vector.cpp -g3 -o $@ 
 
 %.o: %.cpp
-	$(CC) -c $(CFLAGS) $< -o $@
+	
 
 clean:
+	$(RM) $(VECTORTEST)ft
+	$(RM) $(VECTORTEST)std
 	$(RM) $(OBJECTS)
 	
 fclean: clean

@@ -228,9 +228,24 @@ class vector
 
 		// Modifiers
 		template <class InputIterator>
-		void assign (InputIterator first, InputIterator last);
+		void assign (InputIterator first, InputIterator last)
+		{
+			clear();
+			for (; first != last; first++) {
+				push_back(*first);
+			}
+		}
 
-		void assign (size_type n, const value_type &val);
+		void assign (size_type n, const value_type &val)
+		{
+			clear();
+			if (n > _capacity)
+				ReAlloc(n);
+			for (unsigned int x = 0; x < n; x++) {
+				_data[x] = val;
+			}
+			_size = n;
+		}
 
 		void push_back (const value_type &val)
 		{
@@ -248,8 +263,6 @@ class vector
 
 		iterator insert (iterator position, const value_type &val)
 		{
-    //TODO INSERT
-
 			*position++ = val;
 			return position;
 		}
@@ -263,9 +276,19 @@ class vector
 
 		iterator erase(iterator position, iterator last);
 
-		void swap(vector &x);
+		void swap(vector &x)
+		{
+			std::swap(this, x);
+		}
 
-		void clear();
+		void clear()
+		{
+			//capacity dont change
+			// size = 0
+			delete[] _data;
+			_size = 0;
+			_data = _allocator.allocate(_capacity);
+		}
 
 		//Non member function overloads
 	
