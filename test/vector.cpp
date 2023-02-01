@@ -147,15 +147,6 @@ TEST_CASE("Operators") {
 }
 
 TEST_CASE("at") {
-    std::vector<int> stdvec;
-
-    stdvec.push_back(1);
-    stdvec.push_back(2);
-    stdvec.push_back(3);
-    CHECK(stdvec.at(0) == 1);
-    CHECK(stdvec.at(1) == 2);
-    CHECK(stdvec.at(2) == 3);
-
     NAME_SPACE::vector<int> ftvec;
 
     ftvec.push_back(1);
@@ -226,89 +217,99 @@ TEST_CASE("clear") {
 }
 
 TEST_CASE("pop_back") {
-    NAME_SPACE::vector<int> ftvec;
+    NAME_SPACE::vector<int> vec;
 
-    ftvec.push_back(1);
-    ftvec.push_back(2);
-    ftvec.push_back(3);
-    CHECK(ftvec.at(ftvec.size() - 1) == 3);
-    ftvec.pop_back();
-    CHECK(ftvec.at(ftvec.size() - 1) == 2);
-    ftvec.pop_back();
-    CHECK(ftvec.at(ftvec.size() - 1) == 1);
-    ftvec.pop_back();
-    CHECK(ftvec.empty());
+    vec.push_back(1);
+    vec.push_back(2);
+    vec.push_back(3);
+    CHECK(vec.at(vec.size() - 1) == 3);
+    vec.pop_back();
+    CHECK(vec.at(vec.size() - 1) == 2);
+    vec.pop_back();
+    CHECK(vec.at(vec.size() - 1) == 1);
+    vec.pop_back();
+    CHECK(vec.empty());
 }
 
 
 TEST_CASE("resize") {
-    NAME_SPACE::vector<int> ftvec(10, 100);
-    NAME_SPACE::vector<int> ftvec2(5, 100);
+    NAME_SPACE::vector<int> vec(10, 100);
+    NAME_SPACE::vector<int> vec2(5, 100);
 
-    ftvec.resize(5);
-    CHECK(ftvec == ftvec2);
-    ftvec.resize(4);
-    CHECK(ftvec != ftvec2);
-    ftvec.resize(10, 100);
-    ftvec2.resize(10, 100);
-    CHECK(ftvec == ftvec2);
+    vec.resize(5);
+    CHECK(vec == vec2);
+    vec.resize(4);
+    CHECK(vec != vec2);
+    vec.resize(10, 100);
+    vec2.resize(10, 100);
+    CHECK(vec == vec2);
 
 }
 
 TEST_CASE("reserve") {
-    NAME_SPACE::vector<int> ftvec(10, 100);
-    ftvec.reserve(50);
-    CHECK(ftvec.capacity() == 50);
+    NAME_SPACE::vector<int> vec(10, 100);
+    vec.reserve(50);
+    CHECK(vec.capacity() == 50);
 }
 
 TEST_CASE("front") {
-    NAME_SPACE::vector<int> ftvec(10, 10);
-    CHECK(ftvec.front() == 10);
-    ftvec[0] = 15;
-    CHECK(ftvec.front() == 15);
+    NAME_SPACE::vector<int> vec(10, 10);
+    CHECK(vec.front() == 10);
+    vec[0] = 15;
+    CHECK(vec.front() == 15);
 }
 
 TEST_CASE("back") {
-    NAME_SPACE::vector<int> ftvec(10, 10);
-    CHECK(ftvec.back() == 10);
-    ftvec[9] = 15;
-    CHECK(ftvec.back() == 15);
+    NAME_SPACE::vector<int> vec(10, 10);
+    CHECK(vec.back() == 10);
+    vec[9] = 15;
+    CHECK(vec.back() == 15);
 }
 
 TEST_CASE("insert 1") {
-    std::vector<int> stdvec(2, 10);
-    stdvec.insert(stdvec.begin(), 55);
-    stdvec.insert(stdvec.end(), 55);
-    stdvec.insert(stdvec.begin() + 2, 55);
-    CHECK(stdvec.size() == 5);
-    CHECK(stdvec.at(0) == 55);
-    CHECK(stdvec.at(2) == 55);
-    CHECK(stdvec.at(4) == 55);
+    NAME_SPACE::vector<int> vec(2, 10);
+    vec.insert(vec.begin(), 55);
+    vec.insert(vec.end(), 55);
+    vec.insert(vec.begin() + 2, 55);
+    CHECK(vec.size() == 5);
+    CHECK(vec.at(0) == 55);
+    CHECK(vec.at(2) == 55);
+    CHECK(vec.at(4) == 55);
+}
 
+TEST_CASE("insert 2") {
+    NAME_SPACE::vector<int> vec(2, 10);
+    vec.insert(vec.begin() + 1, 3, 55);
+    CHECK(vec.size() == 5);
+    CHECK(vec.at(1) == 55);
+    CHECK(vec.at(2) == 55);
+    CHECK(vec.at(3) == 55);
+}
 
-    //TODO INSERT
-    std::copy(stdvec.begin(), stdvec.end(), std::ostream_iterator<int>(std::cout, " "));
+TEST_CASE("insert 3") {
+    NAME_SPACE::vector<int> vec(2, 10);
+    NAME_SPACE::vector<int> vec2(3, 5);
 
-    NAME_SPACE::vector<int> ftvec(2, 10);
-    ftvec.insert(ftvec.begin(), 55);
-    CHECK(ftvec[0] == 55);
-    ftvec.insert(++ftvec.begin(), 55);
-    CHECK(ftvec[1] == 55);
+    vec.insert(vec.begin() + 1, vec2.begin(),vec2.end());
+    CHECK(vec.size() == 5);
+    CHECK(vec.at(1) == 5);
+    CHECK(vec.at(2) == 5);
+    CHECK(vec.at(3) == 5);
 }
 
 TEST_CASE("assign 1") {
-    NAME_SPACE::vector<char> ftvec(2, 'x');
-    ftvec.assign(55, 'I');
-    CHECK(ftvec.size() == 55);
-    CHECK(ftvec[0] == 'I');
-    CHECK(ftvec[15] == 'I');
-    CHECK(ftvec[54] == 'I');
+    NAME_SPACE::vector<char> vec(2, 'x');
+    vec.assign(55, 'I');
+    CHECK(vec.size() == 55);
+    CHECK(vec[0] == 'I');
+    CHECK(vec[15] == 'I');
+    CHECK(vec[54] == 'I');
 
-    NAME_SPACE::vector<char> ftvec2(5, 'x');
-    ftvec2.assign(2, 'I');
-    CHECK(ftvec2.size() == 2);
-    CHECK(ftvec2[0] == 'I');
-    CHECK(ftvec2[1] == 'I');
+    NAME_SPACE::vector<char> vec2(5, 'x');
+    vec2.assign(2, 'I');
+    CHECK(vec2.size() == 2);
+    CHECK(vec2[0] == 'I');
+    CHECK(vec2[1] == 'I');
 }
 
 TEST_CASE("assign 2") {
@@ -350,3 +351,95 @@ TEST_CASE("assign 2") {
 
     CHECK(vec3.size() == 6);
 }
+
+TEST_CASE("erase 1") {
+    {
+        NAME_SPACE::vector<char> vec(5, 'x');
+
+        vec[0] = 'A';
+        vec.erase(vec.begin());
+        CHECK(vec.size() == 4);
+        CHECK(vec[0] == 'x');
+        CHECK(vec[1] == 'x');
+        CHECK(vec[2] == 'x');
+        CHECK(vec[3] == 'x');
+    }
+    {
+        NAME_SPACE::vector<char> vec(5, 'x');
+        NAME_SPACE::vector<char>::iterator beg = vec.begin();
+
+        vec[4] = 'A';
+        vec[0] = 'A';
+        vec.erase(vec.end() - 1);
+        vec.erase(beg);
+        CHECK(vec.size() == 3);
+        CHECK(vec[0] == 'x');
+        CHECK(vec[1] == 'x');
+        CHECK(vec[2] == 'x');
+    }
+}
+
+TEST_CASE("erase 2") {
+    {
+        NAME_SPACE::vector<char> vec(5, 'x');
+
+        vec[0] = 'A';
+        vec.erase(vec.begin(), vec.end());
+        CHECK(vec.size() == 0);
+    }
+    {
+        NAME_SPACE::vector<int> vec;
+
+        vec.push_back(1);
+        vec.push_back(2);
+        vec.push_back(3);
+
+        vec.erase(vec.begin() + 1, vec.end());
+        CHECK(vec.size() == 1);
+        CHECK(vec[0] == 1);
+    }
+    {
+        NAME_SPACE::vector<char> vec(5, 'x');
+        NAME_SPACE::vector<char>::iterator beg = vec.begin();
+
+        vec[0] = 'G';
+        vec[1] = 'A';
+        vec.erase(vec.end() - 3, vec.end());
+        CHECK(vec.size() == 2);
+        CHECK(vec[0] == 'G');
+        CHECK(vec[1] == 'A');
+        CHECK(*beg == 'G');
+    }
+}
+
+TEST_CASE("swap") {
+    {
+        NAME_SPACE::vector<int> vec;
+        NAME_SPACE::vector<int> vec2;
+
+        vec.push_back(1);
+        vec.push_back(2);
+
+        vec2.push_back(3);
+        vec2.push_back(4);
+        vec2.push_back(5);
+
+        CHECK(vec[0] == 1);
+        CHECK(vec[1] == 2);
+
+        CHECK(vec2[0] == 3);
+        CHECK(vec2[1] == 4);
+        CHECK(vec2[2] == 5);
+
+        vec.swap(vec2);
+
+        CHECK(vec2[0] == 1);
+        CHECK(vec2[1] == 2);
+
+        CHECK(vec[0] == 3);
+        CHECK(vec[1] == 4);
+        CHECK(vec[2] == 5);
+    }
+}
+
+//TODO swap test

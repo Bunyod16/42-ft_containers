@@ -3,6 +3,7 @@
 #include <iostream>
 #include "iterator.hpp"
 #include <memory>
+#include <vector>
 
 namespace ft {
 
@@ -242,7 +243,7 @@ class vector
 			if (n > _capacity)
 				ReAlloc(n);
 			for (unsigned int x = 0; x < n; x++) {
-				_data[x] = val;
+				_allocator.construct(_data + x, val);
 			}
 			_size = n;
 		}
@@ -252,7 +253,7 @@ class vector
 			if (_size >= _capacity) {
 				ReAlloc(_capacity + _capacity / 2);
 			}
-			_data[_size++] = val;
+			_allocator.construct(_data + _size++, val);
 		}
 
 		void pop_back()
@@ -261,30 +262,94 @@ class vector
 				_size--;
 		}
 
-		iterator insert (iterator position, const value_type &val)
+		iterator insert (iterator pos, const value_type &val)
 		{
-			*position++ = val;
-			return position;
+			size_type index = pos - begin();
+			if (_size == _capacity) {
+				reserve(_capacity * 2);
+			}
+			pos = begin() + index;
+			for (iterator head = end(); head != pos; --head) {
+				*head = *(head - 1);
+			}
+			*pos = val;
+			++_size;
+			return (pos);
 		}
 		
-		void insert (iterator position, size_type n, const value_type &val);
+		void insert (iterator pos, size_type n, const value_type &val)
+		{
+			while (n--) {
+				pos = insert(pos, val);
+			}
+		}
 
 		template <class InputIterator>
-		void insert(iterator position, InputIterator first, InputIterator last);
-
-		iterator erase(iterator position);
-
-		iterator erase(iterator position, iterator last);
-
-		void swap(vector &x)
+		void insert(iterator pos, typename enable_if<!is_integral<InputIterator>::value_type, InputIterator>::type first, InputIterator last)
 		{
-			std::swap(this, x);
+			while (first != last) {
+				pos = insert(pos, *first);
+				first++;
+			}
+		}
+
+		iterator erase(iterator position)
+		{
+			if (position == end() - 1)
+			{
+				pop_back();
+				return (end());
+			}
+			
+			size_t	dist	= std::distance(position, end());
+
+			if (!dist)
+				return position;
+
+			while (position != end() - 1)
+			{
+				_allocator.destroy(&(*position));
+				_allocator.construct(&(*position), *(++position));
+			}
+			_size--;
+			_allocator.destroy(_data + _size);
+			return (position - dist);
+		}
+
+		iterator erase(iterator position, iterator last)
+		{
+			if (position == end() - 1)
+			{
+				pop_back();
+				return (end());
+			}
+			
+			size_t	dist	= std::distance(position, last);
+
+			if (!dist)
+				return position;
+
+			while (position != last)
+			{
+				_allocator.destroy(&(*position));
+				if (last == position + 1)
+					break;
+				_allocator.construct(&(*position), *(++position));
+			}
+			_size = _size - dist;
+			_allocator.destroy(_data + _size);
+			return (position - dist);
+		}
+
+		void swap(vector &other)
+		{
+			std::swap(_data, other._data);
+			std::swap(_size, other._size);
+			std::swap(_capacity, other._capacity);
 		}
 
 		void clear()
 		{
-			//capacity dont change
-			// size = 0
 			delete[] _data;
 			_size = 0;
 			_data = _allocator.allocate(_capacity);
@@ -349,10 +414,14 @@ class vector
 			if (newCapacity < size)
 				_size = newCapacity;
 
-			for (size_t i = 0; i < _size; i++)
-				newBlock[i] = _data[i];
+			T* tempHead = newBlock;
+			for (iterator i = begin(); i != end(); i++)
+				_allocator.construct(tempHead++, *i);
 
-			delete[] _data;
+			for (iterator i = begin(); i != end(); i++)
+				_allocator.destroy(&(*i));
+		
+			_allocator.deallocate(_data, _capacity);
 			_data = newBlock;
 			_capacity = newCapacity;
 		}
