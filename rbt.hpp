@@ -1,20 +1,8 @@
 #include <iostream>
+#include <iterator.hpp>
 
 namespace ft
 {
-
-template <class T>
-struct Node {
-	T data; // holds the key
-	Node *parent; // pointer to the parent
-	Node *left; // pointer to left child
-	Node *right; // pointer to right child
-	int color; // 1 -> Red, 0 -> Black
-};
-
-
-// class RBTree implements the operations in Red Black Tree
-
 template<class T, class Compare,class Allocator = std::allocator<T> >
 class RBTree {
 	public:

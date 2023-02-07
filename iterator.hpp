@@ -2,6 +2,7 @@
 # define FT_ITERATOR_HPP
 
 #include <iostream>
+#include "map"
 
 namespace ft
 {
@@ -253,6 +254,88 @@ class VecIterator : public std::iterator<std::random_access_iterator_tag, T>
 	private:
 		T* _ptr;
 };
+
+template <class T>
+struct Node {
+	typedef Node<T> *node;
+	
+	Node() : data(nullptr),
+			parent(nullptr),
+			left(nullptr),
+			right(nullptr),
+			color(0) {}
+
+	Node(T *data, node _parent = nullptr, node _left = nullptr, node _right = nullptr, int color = 0) {};
+	private:
+		T _data; // holds the key
+		node _parent; // pointer to the parent
+		node _left; // pointer to left child
+		node _right; // pointer to right child
+		int _color; // 1 -> Red, 0 -> Black
+	//TODO ORTHODOX CANONICAL
+};
+
+template <class T>
+class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
+{
+	public:
+		typedef T iterator_type;
+		typedef typename ft::iterator_traits<T>::iterator_category iterator_category;
+	    typedef typename ft::iterator_traits<T>::value_type value_type;
+	    typedef typename ft::iterator_traits<T>::difference_type difference_type;
+	    typedef typename ft::iterator_traits<T>::pointer pointer;
+	    typedef typename ft::iterator_traits<T>::reference reference;
+		typedef Node<typename std::remove_const<value_type>::type>*	node_pointer;
+
+		map_iterator() : _ptr(nullptr) {};
+		map_iterator(const map_iterator<typename std::remove_const<value_type>::type> &copy) : _ptr(copy._ptr) {}
+		map_iterator(node_pointer node) : _ptr(node) {}
+		
+		map_iterator	&operator=(const map_iterator &other)
+		{
+			this->_ptr = other._ptr;
+			return (*this);
+		}
+
+		~map_iterator();
+		
+		map_iterator &operator++()
+		{
+			--_ptr;
+			return *this;
+		}
+	
+	    map_iterator operator++(int)
+		{
+			map_iterator tmp(*this);
+			operator++();
+			return tmp;
+		}
+
+	    map_iterator& operator--()
+		{
+			++_ptr;
+			return *this;
+		}
+
+	    map_iterator operator--(int)
+		{
+			map_iterator tmp(*this);
+			operator--();
+			return tmp;
+		}
+
+		bool operator==(const map_iterator& rhs) const { return _ptr == rhs._ptr; }
+	    bool operator!=(const map_iterator& rhs) const { return _ptr != rhs._ptr; }
+	    bool operator<(const map_iterator& rhs) const { return _ptr < rhs._ptr; }
+	    bool operator>(const map_iterator& rhs) const { return _ptr > rhs._ptr; }
+	    bool operator<=(const map_iterator& rhs) const { return _ptr <= rhs._ptr; }
+		bool operator>=(const map_iterator& rhs) const { return _ptr >= rhs._ptr; }
+	    // arithmetic operators
+	private:
+		node_pointer _ptr;
+};
+
 }
 
 #endif
