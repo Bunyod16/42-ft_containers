@@ -9,7 +9,7 @@ CFLAGS = -Wall -Wextra -Werror -std=c++98
 TESTDIR = test
 
 VECTORTEST = v
-MAPTEST = mtest
+MAPTEST = m
 
 all: $(NAME)
 
@@ -22,7 +22,15 @@ $(VECTORTEST)ft: clean
 
 $(VECTORTEST)std: clean
 	$(CC) -c $(CFLAGS) $(TESTDIR)/vector.cpp -DNAME_SPACE=std
-	$(CC) $(CFLAGS) -fsanitize=address -DNAME_SPACE=std $(TESTDIR)/vector.cpp -g3 -o $@ 
+	$(CC) $(CFLAGS) -fsanitize=address -DNAME_SPACE=std $(TESTDIR)/vector.cpp -g3 -o $@
+
+$(MAPTEST)ft: clean
+	$(CC) -c $(CFLAGS) $(TESTDIR)/map.cpp -DNAME_SPACE=ft 
+	$(CC) $(CFLAGS) -fsanitize=address -DNAME_SPACE=ft $(TESTDIR)/map.cpp -g3 -o $@ 
+
+$(MAPTEST)std: clean
+	$(CC) -c $(CFLAGS) $(TESTDIR)/map.cpp -DNAME_SPACE=std
+	$(CC) $(CFLAGS) -fsanitize=address -DNAME_SPACE=std $(TESTDIR)/map.cpp -g3 -o $@ 
 
 %.o: %.cpp
 	

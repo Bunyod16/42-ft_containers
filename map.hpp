@@ -41,12 +41,18 @@ class map
 
         };
 
-        typedef ft::RBTree<value_type, Compare, Allocator>
+
+        private:
+            ft::RBTree<ft::pair<key_type, mapped_type>, value_compare, allocator_type> _rbt;
+            allocator_type                                   _alloc;
+            key_compare                                     _key_compare;
 
         //Member Functions
-        map();
-
-        explicit map(const Compare &comp, const Allocator &alloc = Allocator() );
+        //default
+        explicit map(const key_compare &comp = key_compare(), const allocator_type &alloc = allocator_type()) :
+                _rbt(comp, alloc),
+                _key_compare(comp),
+                _alloc(alloc);
 
         template< class InputIt >
         map( InputIt first, InputIt last, const Compare& comp = Compare(), const Allocator& alloc = Allocator() );
@@ -139,10 +145,6 @@ class map
         template< class Key, class T, class Compare, class Alloc >
         void swap( std::map<Key,T,Compare,Alloc>& lhs,
                 std::map<Key,T,Compare,Alloc>& rhs );
-    
-    private:
-        ft::RBTree<ft::pair<key_type, mapped_type> > _rbt;
-        Compare                                     _key_compare;
 };
 }
 #endif

@@ -259,20 +259,38 @@ template <class T>
 struct Node {
 	typedef Node<T> *node;
 	
-	Node() : data(nullptr),
-			parent(nullptr),
-			left(nullptr),
-			right(nullptr),
-			color(0) {}
+	Node() : _data(nullptr),
+			_parent(nullptr),
+			_left(nullptr),
+			_right(nullptr),
+			_is_sentinal(false),
+			_color(0) {}
 
-	Node(T *data, node _parent = nullptr, node _left = nullptr, node _right = nullptr, int color = 0) {};
-	private:
-		T _data; // holds the key
+	Node(T *data, node parent = nullptr, node left = nullptr, node right = nullptr, bool is_sentinal = false, int color = 0) : 
+		_data(data),
+		_parent(parent),
+		_left(left),
+		_right(right),
+		_is_sentinal(is_sentinal),
+		_color(color) {};
+
+	Node(const Node &other) : 
+		_data(other._data),
+		_parent(other._parent),
+		_left(other._left),
+		_right(other._right),
+		_is_sentinal(other._is_sentinal),
+		_color(other._color) {};
+
+	~Node() {};
+
+	public:
+		T _data; // holds the pair, access key with .first and value with .second
 		node _parent; // pointer to the parent
 		node _left; // pointer to left child
 		node _right; // pointer to right child
 		int _color; // 1 -> Red, 0 -> Black
-	//TODO ORTHODOX CANONICAL
+		bool _is_sentinal; // 1 -> Red, 0 -> Black
 };
 
 template <class T>
@@ -301,27 +319,116 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 		
 		map_iterator &operator++()
 		{
-			--_ptr;
+			// if node has a right child
+			if (!_ptr->_right._is_sentinal)
+			{
+				_ptr = _ptr->_right;
+				while (!_ptr->_left._is_sentinal) {
+					_ptr = _ptr->_left;
+				}
+			}
+			else
+			{
+				// set parent to one node above child
+				node_pointer _parent = _ptr->_parent;
+
+				// while a node is the _right child of a _parent
+				while (_parent->_is_sentinal && _ptr == _parent->_right)
+				{
+					// set _parent to node
+					_ptr = _parent;
+					_parent = _parent->_parent;
+				}
+				// set node to _parent
+				_ptr = _parent;
+			}
 			return *this;
 		}
 	
 	    map_iterator operator++(int)
 		{
-			map_iterator tmp(*this);
-			operator++();
-			return tmp;
+			map_iterator<value_type> ret = *this;
+
+			// if node has a _right child
+			if (!_ptr->_right._is_sentinal)
+			{
+				_ptr = _ptr->_right;
+				while (!_ptr->_left._is_sentinal) {
+					_ptr = _ptr->_left;
+				}
+			}
+			else
+			{
+				// set _parent to one node above child
+				node_pointer _parent = _ptr->_parent;
+
+				// while a node is the _right child of a _parent
+				while (!_parent->_is_sentinal && _ptr == _parent->_right)
+				{
+					// set _parent to node
+					_ptr = _parent;
+					_parent = _parent->_parent;
+				}
+				// set node to _parent
+				_ptr = _parent;
+			}
+			return ret;
 		}
 
 	    map_iterator& operator--()
 		{
-			++_ptr;
+			// if node has a _left child
+			if (!_ptr->_left._is_sentinal)
+			{
+				_ptr = _ptr->_left;
+				while (!_ptr->_right._is_sentinal) {
+					_ptr = _ptr->_right;
+				}
+			}
+			else
+			{
+				// set parent to one node above child
+				node_pointer _parent = _ptr->_parent;
+
+				// while a node is the _left child of a _parent
+				while (!_parent->_is_sentinal && _ptr == _parent->_left)
+				{
+					// set _parent to node
+					_ptr = _parent;
+					_parent = _parent->_parent;
+				}
+				// set node to _parent
+				_ptr = _parent;
+			}
 			return *this;
-		}
+  		}
 
 	    map_iterator operator--(int)
 		{
-			map_iterator tmp(*this);
-			operator--();
+			map_iterator<value_type> tmp(*this);
+			// if node has a _left child
+			if (!_ptr->_left._is_sentinal)
+			{
+				_ptr = _ptr->_left;
+				while (!_ptr->_right._is_sentinal) {
+					_ptr = _ptr->_right;
+				}
+			}
+			else
+			{
+				// set _parent to one node above child
+				node_pointer _parent = _ptr->_parent;
+
+				// while a node is the _left child of a _parent
+				while (!_parent->_is_sentinal && _ptr == _parent->_left)
+				{
+					// set _parent to node
+					_ptr = _parent;
+					_parent = _parent->_parent;
+				}
+				// set node to _parent
+				_ptr = _parent;
+			}
 			return tmp;
 		}
 
@@ -332,8 +439,8 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 	    bool operator<=(const map_iterator& rhs) const { return _ptr <= rhs._ptr; }
 		bool operator>=(const map_iterator& rhs) const { return _ptr >= rhs._ptr; }
 	    // arithmetic operators
-	private:
 		node_pointer _ptr;
+
 };
 
 }
