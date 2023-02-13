@@ -158,7 +158,7 @@ struct pair
 };
 
 template <class A, class B>
-std::pair<A, B> make_pair( A t, B u )
+ft::pair<A, B> make_pair( A t, B u )
 {
 	return (pair<A, B>(t, u));
 }

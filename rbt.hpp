@@ -47,8 +47,8 @@ public:
 	}
 
 	//constructor
-	RBTree(const key_compare comp = key_compare(), const Allocator alloc = Allocator()) : _comp(comp),
-																							_val_alloc(alloc),
+	RBTree(const value_comp comp = value_comp(), const Allocator alloc = Allocator()) : _val_alloc(alloc),
+																							_comp(comp),
 																							_size(0)
 	{
 		_node_alloc = node_allocator();
@@ -96,7 +96,7 @@ public:
 		return (reverse_iterator(min(_root)));
 	}
 
-	node_pointer	find_val(node_pointer node, const value_type &key) const
+	node_pointer	find_val(node_pointer node, const value_type &val) const
 	{
 		if (node == _sentinal)
 			return node;
