@@ -121,19 +121,19 @@ struct pair
 	}
 
 	template <class A, class B>
-	friend bool operator==( const std::pair<A, B>& lhs, const std::pair<A, B>& rhs )
+	friend bool operator==( const pair<A, B>& lhs, const pair<A, B>& rhs )
 	{
 		return (lhs.first == rhs.first && lhs.second == rhs.second);
 	}
 
 	template <class A, class B>
-	friend bool operator!=( const std::pair<A, B>& lhs, const std::pair<A, B>& rhs )
+	friend bool operator!=( const pair<A, B>& lhs, const pair<A, B>& rhs )
 	{
 		return (lhs.first != rhs.first && lhs.second != rhs.second);
 	}
 
 	template <class A, class B>
-	friend bool operator<( const std::pair<A, B>& lhs, const std::pair<A, B>& rhs )
+	friend bool operator<( const pair<A, B>& lhs, const pair<A, B>& rhs )
 	{
 		return (lhs.first < rhs.first || (lhs.first < rhs.first && lhs.second < rhs.second));
 	}
@@ -257,7 +257,7 @@ class VecIterator : public std::iterator<std::random_access_iterator_tag, T>
 
 template <class T>
 struct Node {
-	typedef Node<T> *node;
+	typedef Node<T> *node_pointer;
 	
 	Node() : _data(nullptr),
 			_parent(nullptr),
@@ -266,29 +266,29 @@ struct Node {
 			_is_sentinal(false),
 			_color(0) {}
 
-	Node(T *data, node parent = nullptr, node left = nullptr, node right = nullptr, bool is_sentinal = false, int color = 0) : 
+	Node(T data, node_pointer parent = nullptr, node_pointer left = nullptr, node_pointer right = nullptr, bool is_sentinal = false, int color = 0) : 
 		_data(data),
 		_parent(parent),
 		_left(left),
 		_right(right),
-		_is_sentinal(is_sentinal),
-		_color(color) {};
+		_color(color),
+		_is_sentinal(is_sentinal) {};
 
 	Node(const Node &other) : 
 		_data(other._data),
 		_parent(other._parent),
 		_left(other._left),
 		_right(other._right),
-		_is_sentinal(other._is_sentinal),
-		_color(other._color) {};
+		_color(other._color),
+		_is_sentinal(other._is_sentinal) {};
 
 	~Node() {};
 
 	public:
 		T _data; // holds the pair, access key with .first and value with .second
-		node _parent; // pointer to the parent
-		node _left; // pointer to left child
-		node _right; // pointer to right child
+		node_pointer _parent; // pointer to the parent
+		node_pointer _left; // pointer to left child
+		node_pointer _right; // pointer to right child
 		int _color; // 1 -> Red, 0 -> Black
 		bool _is_sentinal; // 1 -> Red, 0 -> Black
 };
@@ -298,11 +298,11 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 {
 	public:
 		typedef T iterator_type;
-		typedef typename ft::iterator_traits<T>::iterator_category iterator_category;
-	    typedef typename ft::iterator_traits<T>::value_type value_type;
-	    typedef typename ft::iterator_traits<T>::difference_type difference_type;
-	    typedef typename ft::iterator_traits<T>::pointer pointer;
-	    typedef typename ft::iterator_traits<T>::reference reference;
+		typedef typename ft::iterator<std::bidirectional_iterator_tag, T>::iterator_category iterator_category;
+	    typedef typename ft::iterator<std::bidirectional_iterator_tag, T>::value_type value_type;
+	    typedef typename ft::iterator<std::bidirectional_iterator_tag, T>::difference_type difference_type;
+	    typedef typename ft::iterator<std::bidirectional_iterator_tag, T>::pointer pointer;
+	    typedef typename ft::iterator<std::bidirectional_iterator_tag, T>::reference reference;
 		typedef Node<typename std::remove_const<value_type>::type>*	node_pointer;
 
 		map_iterator() : _ptr(nullptr) {};
@@ -315,7 +315,7 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 			return (*this);
 		}
 
-		~map_iterator();
+		~map_iterator() {};
 		
 		map_iterator &operator++()
 		{
@@ -350,10 +350,10 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 			map_iterator<value_type> ret = *this;
 
 			// if node has a _right child
-			if (!_ptr->_right._is_sentinal)
+			if (!_ptr->_right->_is_sentinal)
 			{
 				_ptr = _ptr->_right;
-				while (!_ptr->_left._is_sentinal) {
+				while (!_ptr->_left->_is_sentinal) {
 					_ptr = _ptr->_left;
 				}
 			}

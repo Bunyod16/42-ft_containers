@@ -8,13 +8,13 @@
 namespace ft
 {
 
-template<class Key, class T, class Compare = std::less<Key>,class Allocator = std::allocator<std::pair<const Key, T> > >
+template<class Key, class T, class Compare = std::less<Key>,class Allocator = std::allocator<ft::pair<const Key, T> > >
 class map
 {
 	public:
 		typedef Key key_type;
 		typedef T mapped_type;
-		typedef std::pair<const key_type, mapped_type> value_type;
+		typedef ft::pair<const key_type, mapped_type> value_type;
 		typedef Compare key_compare;
 		typedef Allocator allocator_type;
 		typedef typename allocator_type::reference reference;
@@ -26,7 +26,7 @@ class map
 		typedef ft::VecRevIterator<iterator> reverse_iterator;
 		typedef ft::VecRevIterator<const iterator> const_reverse_iterator;
 		typedef size_t size_type;
-	
+
 		class value_compare : public std::binary_function<value_type, value_type, bool>
 		{
 			protected:
@@ -37,16 +37,19 @@ class map
 
 				bool operator()( const value_type& lhs, const value_type& rhs ) const
 				{
-					comp(lhs.first, rhs.first);
+					return (comp(lhs.first, rhs.first));
 				}
 
 		};
 
-
+		typedef ft::RBTree<ft::pair<const key_type, mapped_type>, value_compare, allocator_type> tree_type;
+		typedef typename tree_type::node_pointer node_pointer;
+		typedef typename tree_type::iterator	tree_iterator;
+	
 		private:
-			ft::RBTree<ft::pair<key_type, mapped_type>, value_compare, allocator_type> _rbt;
-			allocator_type                                   _alloc;
-			key_compare                                     _key_compare;
+			tree_type		_rbt;
+			allocator_type	_alloc;
+			key_compare		_key_compare;
 
 		//Member Functions
 		//default
@@ -56,12 +59,12 @@ class map
 					_alloc(alloc),
 					_key_compare(comp) {}
 
-			template< class InputIt >
-			map( InputIt first, InputIt last, const Compare& comp = Compare(), const Allocator& alloc = Allocator() );
+			// template< class InputIt >
+			// map( InputIt first, InputIt last, const Compare& comp = Compare(), const Allocator& alloc = Allocator() ) {};
 
-			map( const map& other );
+			// map( const map& other ) {};
 
-			~map();
+			~map() {};
 
 			map& operator=( const map& other );
 
@@ -72,7 +75,20 @@ class map
 
 			const T& at( const Key& key ) const;
 
-			T& operator[]( const Key& key );
+			T& operator[]( const Key& key )
+			{
+				tree_iterator it(_rbt.get_root());
+
+				while(it != _rbt.end())
+				{
+					if (it._ptr->_data.first == key)
+						return it._ptr->_data.second;
+					it++;
+				}
+
+				iterator result = insert(ft::make_pair(key, mapped_type())).first;
+				return ((*result).second);
+			};
 
 			//Capacity
 			bool empty() const;
@@ -84,7 +100,11 @@ class map
 			//Modifiers
 			void clear();
 
-			ft::pair<iterator, bool> insert( const value_type& value );
+			ft::pair<iterator, bool> insert( const value_type& value ) {
+				node_pointer node;
+				node = _rbt.insert(value);
+				return (ft::make_pair(iterator(&node->_data), true)); //TODO unhardcode
+			};
 
 			template< class InputIt >
 			void insert( InputIt first, InputIt last );

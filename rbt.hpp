@@ -3,7 +3,7 @@
 
 namespace ft
 {
-template<class T, class Compare = std::less<T>,class Allocator = std::allocator<T> >
+template<class T, class Compare = std::less<T>, class Allocator = std::allocator<T> >
 class RBTree {
 	public:
 		typedef Node<T> node_type;
@@ -33,6 +33,11 @@ private:
  
 public:
 
+	node_pointer get_root()
+	{
+		return _root;
+	}
+
 	node_pointer create_node(const value_type &val = value_type(), bool is_sentinal = false)
 	{
 		node_pointer node;
@@ -42,7 +47,7 @@ public:
 		new_val = _val_alloc.allocate(1);
 
 		_val_alloc.construct(new_val, val);
-		_node_alloc.construct(node, node_type(new_val, _sentinal, _sentinal, _sentinal, is_sentinal, 1));
+		_node_alloc.construct(node, node_type(*new_val, _sentinal, _sentinal, _sentinal, is_sentinal, 1));
 		return (node);
 	}
 
@@ -100,46 +105,35 @@ public:
 	{
 		if (node == _sentinal)
 			return node;
-		if (_comp(val, node->data))
-			return find_val(node->left, val);
-		if (_comp(node->data, val))
-			return find_val(node->right, val);
+		if (_comp(val, node->_data))
+			return find_val(node->_left, val);
+		if (_comp(node->_data, val))
+			return find_val(node->_right, val);
 		return node;
 	}
 
 	void preOrderHelper(node_pointer node) {
 		if (node != _sentinal) {
-			std::cout<<node->data<<" ";
-			preOrderHelper(node->left);
-			preOrderHelper(node->right);
+			std::cout<<node->_data<<" ";
+			preOrderHelper(node->_left);
+			preOrderHelper(node->_right);
 		} 
 	}
 
 	void inOrderHelper(node_pointer node) {
 		if (node != _sentinal) {
-			inOrderHelper(node->left);
+			inOrderHelper(node->_left);
 			std::cout<<node->data<<" ";
-			inOrderHelper(node->right);
+			inOrderHelper(node->_right);
 		} 
 	}
 
 	void postOrderHelper(node_pointer node) {
 		if (node != _sentinal) {
-			postOrderHelper(node->left);
-			postOrderHelper(node->right);
+			postOrderHelper(node->_left);
+			postOrderHelper(node->_right);
 			std::cout<<node->data<<" ";
 		} 
-	}
-
-	node_pointer searchTree(node_pointer node, key_type key) {
-		if (node == _sentinal || key == node->data) {
-			return node;
-		}
-
-		if (key < node->_data) {
-			return searchTree(node->_left, key);
-		} 
-		return searchTree(node->_right, key);
 	}
 
 	// fix the rb tree modified by the delete operation
@@ -227,8 +221,8 @@ public:
 	void fixInsert(node_pointer k){
 		node_pointer u;
 		while (k->_parent->_color == 1) {
-			if (k->_parent == k->_parent->_parent->right) {
-				u = k->_parent->_parent->left; // uncle
+			if (k->_parent == k->_parent->_parent->_right) {
+				u = k->_parent->_parent->_left; // uncle
 				if (u->_color == 1) {
 					// case 3.1
 					u->_color = 0;
@@ -236,7 +230,7 @@ public:
 					k->_parent->_parent->_color = 1;
 					k = k->_parent->_parent;
 				} else {
-					if (k == k->_parent->left) {
+					if (k == k->_parent->_left) {
 						// case 3.2.2
 						k = k->_parent;
 						rightRotate(k);
@@ -247,7 +241,7 @@ public:
 					leftRotate(k->_parent->_parent);
 				}
 			} else {
-				u = k->_parent->_parent->right; // uncle
+				u = k->_parent->_parent->_right; // uncle
 
 				if (u->_color == 1) {
 					// mirror case 3.1
@@ -256,7 +250,7 @@ public:
 					k->_parent->_parent->_color = 1;
 					k = k->_parent->_parent;	
 				} else {
-					if (k == k->_parent->right) {
+					if (k == k->_parent->_right) {
 						// mirror case 3.2.2
 						k = k->_parent;
 						leftRotate(k);
@@ -369,7 +363,7 @@ public:
 
 	// insert the key to the tree in its appropriate position
 	// and fix the tree
-	void insert(const value_type &val) {
+	node_pointer insert(const value_type &val) {
 		// Ordinary Binary Search Insertion
 		node_pointer node = create_node(val);
 		node->_parent = _sentinal;
@@ -406,16 +400,17 @@ public:
 		// if new node is a _root node, simply return
 		if (node->_parent == _sentinal){
 			node->_color = 0;
-			return;
+			return (node);
 		}
 
 		// if the grandparent is null, simply return
 		if (node->_parent->_parent == _sentinal) {
-			return;
+			return (node);
 		}
 
 		// Fix the tree
 		fixInsert(node);
+		return (node);
 	}
 
 	node_pointer getRoot(){
@@ -469,7 +464,7 @@ public:
 			y->_left->_parent = y;
 			y->_color = z->_color;
 		}
-		delete z;
+		_node_alloc.deallocate(z);
 		if (y_original_color == 0){
 			fixDelete(x);
 		}
