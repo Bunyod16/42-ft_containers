@@ -77,23 +77,21 @@ class map
 
 			T& operator[]( const Key& key )
 			{
-				tree_iterator it(_rbt.get_root());
+				node_pointer node;
 
-				while(it != _rbt.end())
-				{
-					if (it._ptr->_data.first == key)
-						return it._ptr->_data.second;
-					it++;
-				}
-
-				iterator result = insert(ft::make_pair(key, mapped_type())).first;
-				return ((*result).second);
+				node = _rbt.find_key(key);
+				if (node->_data.first == key) 
+					return (node->_data.second);
+				else
+					return ((*insert(make_pair(key, mapped_type())).first).second);
 			};
 
 			//Capacity
 			bool empty() const;
 
-			size_type size() const;
+			size_type size() const {
+				return (_rbt.size());
+			};
 
 			size_type max_size() const;
 
@@ -103,6 +101,8 @@ class map
 			ft::pair<iterator, bool> insert( const value_type& value ) {
 				node_pointer node;
 				node = _rbt.insert(value);
+
+				_rbt.prettyPrint();
 				return (ft::make_pair(iterator(&node->_data), true)); //TODO unhardcode
 			};
 

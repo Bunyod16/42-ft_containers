@@ -9,6 +9,7 @@ class RBTree {
 		typedef Node<T> node_type;
         typedef T value_type;
 		typedef typename T::first_type key_type;
+		typedef typename T::second_type mapped_type;
         typedef Compare value_comp;
         typedef Allocator allocator_type;
 		typedef std::allocator<Node<T> > node_allocator;
@@ -33,6 +34,11 @@ private:
  
 public:
 
+	size_t	size() const
+	{
+		return _size;
+	}
+
 	node_pointer get_root()
 	{
 		return _root;
@@ -47,7 +53,7 @@ public:
 		new_val = _val_alloc.allocate(1);
 
 		_val_alloc.construct(new_val, val);
-		_node_alloc.construct(node, node_type(*new_val, _sentinal, _sentinal, _sentinal, is_sentinal, 1));
+		_node_alloc.construct(node, node_type(*new_val, nullptr, _sentinal, _sentinal, is_sentinal, 1));
 		return (node);
 	}
 
@@ -59,8 +65,8 @@ public:
 		_node_alloc = node_allocator();
 		_sentinal = create_node(value_type()) ;
 		_sentinal->_color = 0;
-		_sentinal->_left = nullptr;
-		_sentinal->_right = nullptr;
+		_sentinal->_left = _sentinal;
+		_sentinal->_right = _sentinal;
 		_sentinal->_is_sentinal = true;
 		_root = _sentinal;
 	}
@@ -331,7 +337,7 @@ public:
 			y->_left->_parent = x;
 		}
 		y->_parent = x->_parent;
-		if (x->_parent == nullptr) {
+		if (x->_parent->_is_sentinal) {
 			this->_root = y;
 		} else if (x == x->_parent->_left) {
 			x->_parent->_left = y;
@@ -350,7 +356,7 @@ public:
 			y->_right->_parent = x;
 		}
 		y->_parent = x->_parent;
-		if (x->_parent == nullptr) {
+		if (x->_parent->_is_sentinal) {
 			this->_root = y;
 		} else if (x == x->_parent->_right) {
 			x->_parent->_right = y;
@@ -366,15 +372,15 @@ public:
 	node_pointer insert(const value_type &val) {
 		// Ordinary Binary Search Insertion
 		node_pointer node = create_node(val);
-		node->_parent = _sentinal;
+		node->_parent = nullptr;
 		node->_left = _sentinal;
 		node->_right = _sentinal;
 		node->_color = 1; // new node must be red
+		node_pointer y = _sentinal;
+		node_pointer x = _root;
 
-		node_pointer y = nullptr;
-		node_pointer x = this->_root;
-
-		while (x != _sentinal)
+		std::cout << "INSERTING NODE WITH KEY: " << node->_data.first << std::endl;
+		while (!x->_is_sentinal)
         {
 			y = x;
 			if (_comp(node->_data, x->_data))
@@ -386,30 +392,36 @@ public:
 				x = x->_right;
 			}
 		}
-
 		// y is parent of x
 		node->_parent = y;
-		if (y == _sentinal) {
+		if (y->_is_sentinal) {
+			std::cout << "ROOT CHANGED" << std::endl;
 			_root = node;
-		} else if (node->_data.first < y->_data.first) {
+		} else if (_comp(node->_data, y->_data)) {
+			std::cout << "LEFT NODE" << y->_data.first << std::endl;
 			y->_left = node;
 		} else {
+			std::cout << "RIGHT NODE" << y->_data.first << std::endl;
 			y->_right = node;
 		}
 
 		// if new node is a _root node, simply return
-		if (node->_parent == _sentinal){
+		_size++;
+		if (node->_parent->_is_sentinal){
 			node->_color = 0;
+			std::cout << "ROOT COLORED BLACK" << std::endl;
 			return (node);
 		}
 
 		// if the grandparent is null, simply return
-		if (node->_parent->_parent == _sentinal) {
+		if (node->_parent->_parent->_is_sentinal) {
 			return (node);
 		}
 
 		// Fix the tree
+		std::cout << "FIXING TREE" << std::endl;
 		fixInsert(node);
+		std::cout << "NEW ROOT: " << _root->_data.first << std::endl;
 		return (node);
 	}
 
@@ -475,31 +487,43 @@ public:
 		deleteNodeHelper(_root, val);
 	}
 
-	void printHelper(node_pointer root, std::string indent, bool last) {
+	void printHelper(node_pointer node, std::string indent, bool last) {
 		// print the tree structure on the screen
-	   	if (root != _sentinal) {
+	   	if (!node->_is_sentinal) {
 		   std::cout<<indent;
 		   if (last) {
-		      std::cout<<"R----";
+		      std::cout << "R----";
 		      indent += "     ";
 		   } else {
-		      std::cout<<"L----";
+		      std::cout << "L----";
 		      indent += "|    ";
 		   }
             
-           std::string sColor = root->color?"RED":"BLACK";
-		   std::cout<<root->data<<"("<<sColor<<")"<<std::endl;
-		   printHelper(root->left, indent, false);
-		   printHelper(root->right, indent, true);
+           std::string color = node->_color ? "RED" : "BLACK";
+		   std::cout<<node->_data.first << ":" << node->_data.second << " " << "(" << color << ")" << std::endl;
+		   printHelper(node->_left, indent, false);
+		   printHelper(node->_right, indent, true);
 		}
-		// cout<<root->left->data<<endl;
+		// std::cout<<root->left->data<<std::endl;
 	}
 
 	void prettyPrint() {
-	    if (_root) {
+		
+	    if (!_root->_is_sentinal) {
     		printHelper(_root, "", true);
 	    }
 	}
+
+	node_pointer find_key(key_type key)
+	{
+		node_pointer node;
+
+		value_type val(key, mapped_type());
+
+		node = find_val(_root, val);
+		return (node);
+	}
+
 };
 }
 

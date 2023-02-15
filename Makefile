@@ -38,6 +38,8 @@ $(MAPTEST)std: clean
 clean:
 	$(RM) $(VECTORTEST)ft
 	$(RM) $(VECTORTEST)std
+	$(RM) $(MAPTEST)ft
+	$(RM) $(MAPTEST)std
 	$(RM) $(OBJECTS)
 	
 fclean: clean
