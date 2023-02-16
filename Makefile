@@ -26,7 +26,8 @@ $(VECTORTEST)std: clean
 
 $(MAPTEST)ft: clean
 	$(CC) -c $(CFLAGS) $(TESTDIR)/map.cpp -DNAME_SPACE=ft 
-	$(CC) $(CFLAGS) -fsanitize=address -DNAME_SPACE=ft $(TESTDIR)/map.cpp -g3 -o $@ 
+	$(CC) $(CFLAGS) -fsanitize=address -DNAME_SPACE=ft $(TESTDIR)/map.cpp -g3 -o $@
+	./$(MAPTEST)ft
 
 $(MAPTEST)std: clean
 	$(CC) -c $(CFLAGS) $(TESTDIR)/map.cpp -DNAME_SPACE=std

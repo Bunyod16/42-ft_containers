@@ -64,6 +64,7 @@ public:
 	{
 		_node_alloc = node_allocator();
 		_sentinal = create_node(value_type()) ;
+		_sentinal->_parent = _sentinal;
 		_sentinal->_color = 0;
 		_sentinal->_left = _sentinal;
 		_sentinal->_right = _sentinal;
@@ -522,6 +523,11 @@ public:
 
 		node = find_val(_root, val);
 		return (node);
+	}
+
+	node_pointer get_sentinal()
+	{
+		return _sentinal;
 	}
 
 };

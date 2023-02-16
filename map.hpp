@@ -21,8 +21,8 @@ class map
 		typedef typename allocator_type::const_reference const_reference;
 		typedef typename allocator_type::pointer pointer;
 		typedef typename allocator_type::const_pointer const_pointer;
-		typedef ft::VecIterator<value_type> iterator;
-		typedef ft::VecIterator<const value_type> const_iterator;
+		typedef ft::map_iterator<value_type> iterator;
+		typedef ft::map_iterator<const value_type> const_iterator;
 		typedef ft::VecRevIterator<iterator> reverse_iterator;
 		typedef ft::VecRevIterator<const iterator> const_reverse_iterator;
 		typedef size_t size_type;
@@ -68,12 +68,31 @@ class map
 
 			map& operator=( const map& other );
 
-			allocator_type get_allocator() const;
+			allocator_type get_allocator() const
+			{
+				return _alloc;
+			}
 
 			// Element access
-			T& at( const Key& key );
+			T& at( const Key& key )
+			{
+				node_pointer node;
 
-			const T& at( const Key& key ) const;
+				node = _rbt.find_key(key);
+				if (node->_data.first != key)
+					throw std::out_of_range("No such key exists");
+				return (node->_data.second);
+			};
+
+			const T& at( const Key& key ) const
+			{
+				node_pointer node;
+
+				node = _rbt.find_key(key);
+				if (node->_data.first != key)
+					throw std::out_of_range("No such key exists");
+				return (node->_data.second);
+			};
 
 			T& operator[]( const Key& key )
 			{
@@ -85,25 +104,58 @@ class map
 				else
 					return ((*insert(make_pair(key, mapped_type())).first).second);
 			};
+			
+			// Iterators
+			iterator begin()
+			{
+				std::cout << "BEGIN: " << _rbt.min(_rbt.get_root())->_data.first << std::endl;
+				return (iterator(_rbt.min(_rbt.get_root())));
+			};
+
+			const_iterator begin() const
+			{
+				return (const_iterator(&_rbt.min(_rbt.get_root())));
+			};
+			
+			iterator end()
+			{
+				return (iterator(_rbt.get_sentinal()));
+			};
+
+			const_iterator end() const
+			{
+				return (const_iterator(_rbt.get_sentinal()));
+			};
 
 			//Capacity
-			bool empty() const;
+			bool empty() const
+			{
+				return _rbt.size() < 1 ? true : false;
+			};
 
-			size_type size() const {
+			size_type size() const
+			{
 				return (_rbt.size());
 			};
 
-			size_type max_size() const;
+			size_type max_size() const
+			{
+				if (std::is_same<T, char>::value || std::is_same<T, unsigned char>::value) { return _alloc.max_size() / 2; }
+
+				return (_alloc.max_size());
+			}
 
 			//Modifiers
-			void clear();
+			void clear() 
+			{
+				// _rbt.clear();
+			}
 
 			ft::pair<iterator, bool> insert( const value_type& value ) {
 				node_pointer node;
 				node = _rbt.insert(value);
 
-				_rbt.prettyPrint();
-				return (ft::make_pair(iterator(&node->_data), true)); //TODO unhardcode
+				return (ft::make_pair(iterator(node), true)); //TODO unhardcode
 			};
 
 			template< class InputIt >

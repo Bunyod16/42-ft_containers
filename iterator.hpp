@@ -320,10 +320,14 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 		map_iterator &operator++()
 		{
 			// if node has a right child
-			if (!_ptr->_right._is_sentinal)
+			if (_ptr == max()) {
+				_ptr = _ptr->_right;
+				return *this;
+			}
+			if (!_ptr->_right->_is_sentinal)
 			{
 				_ptr = _ptr->_right;
-				while (!_ptr->_left._is_sentinal) {
+				while (!_ptr->_left->_is_sentinal) {
 					_ptr = _ptr->_left;
 				}
 			}
@@ -333,7 +337,7 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 				node_pointer _parent = _ptr->_parent;
 
 				// while a node is the _right child of a _parent
-				while (_parent->_is_sentinal && _ptr == _parent->_right)
+				while (!_parent->_is_sentinal && _ptr == _parent->_right)
 				{
 					// set _parent to node
 					_ptr = _parent;
@@ -347,9 +351,13 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 	
 	    map_iterator operator++(int)
 		{
-			map_iterator<value_type> ret = *this;
-
+			map_iterator<value_type> tmp(*this);
 			// if node has a _right child
+			if (_ptr == max())
+			{
+				_ptr = _ptr->_right;
+				return tmp;
+			}
 			if (!_ptr->_right->_is_sentinal)
 			{
 				_ptr = _ptr->_right;
@@ -362,6 +370,7 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 				// set _parent to one node above child
 				node_pointer _parent = _ptr->_parent;
 
+
 				// while a node is the _right child of a _parent
 				while (!_parent->_is_sentinal && _ptr == _parent->_right)
 				{
@@ -372,16 +381,23 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 				// set node to _parent
 				_ptr = _parent;
 			}
-			return ret;
+			return tmp;
 		}
 
 	    map_iterator& operator--()
 		{
 			// if node has a _left child
-			if (!_ptr->_left._is_sentinal)
+			if (_ptr->_is_sentinal)
+			{
+				_ptr = max();
+				std::cout << "was sentinel now is " << _ptr->_data.first << std::endl;
+				return *this;
+			}
+			if (!_ptr->_left->_is_sentinal)
 			{
 				_ptr = _ptr->_left;
-				while (!_ptr->_right._is_sentinal) {
+				while (!_ptr->_right->_is_sentinal)
+				{
 					_ptr = _ptr->_right;
 				}
 			}
@@ -407,16 +423,22 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 		{
 			map_iterator<value_type> tmp(*this);
 			// if node has a _left child
-			if (!_ptr->_left._is_sentinal)
+			if (_ptr->_is_sentinal)
+			{
+				std::cout << "min called" << std::endl;
+				_ptr = max();
+				return tmp;
+			}
+			if (!_ptr->_left->_is_sentinal)
 			{
 				_ptr = _ptr->_left;
-				while (!_ptr->_right._is_sentinal) {
+				while (!_ptr->_right->_is_sentinal) {
 					_ptr = _ptr->_right;
 				}
 			}
 			else
 			{
-				// set _parent to one node above child
+				// set parent to one node above child
 				node_pointer _parent = _ptr->_parent;
 
 				// while a node is the _left child of a _parent
@@ -438,8 +460,49 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 	    bool operator>(const map_iterator& rhs) const { return _ptr > rhs._ptr; }
 	    bool operator<=(const map_iterator& rhs) const { return _ptr <= rhs._ptr; }
 		bool operator>=(const map_iterator& rhs) const { return _ptr >= rhs._ptr; }
+		reference	operator*(void) const { return (this->_ptr->_data); }
+		pointer		operator->(void) const { return (&this->_ptr->_data); }
 	    // arithmetic operators
-		node_pointer _ptr;
+		private:
+			node_pointer _ptr;
+
+			node_pointer max()
+			{
+				node_pointer temp = _ptr;
+				
+				if (temp->_is_sentinal)
+				{
+					if (!temp->_right->_is_sentinal)
+						temp = temp->_right;
+					else if (!temp->_left->_is_sentinal)
+						temp = temp->_left;
+				}
+
+				while (temp->_parent->_is_sentinal == false)
+					temp = temp->_parent;
+				while (temp->_right->_is_sentinal == false)
+					temp = temp->_right;
+				return (temp);
+			}
+	
+			node_pointer min()
+			{
+				node_pointer temp = _ptr;
+	
+				if (temp->_is_sentinal)
+				{
+					if (!temp->_right->_is_sentinal)
+						temp = temp->_right;
+					else if (!temp->_left->_is_sentinal)
+						temp = temp->_left;
+				}
+
+				while (temp->_parent->_is_sentinal == false)
+					temp = temp->_parent;
+				while (temp->_left->_is_sentinal == false)
+					temp = temp->_left;
+				return (temp);
+			}
 
 };
 
