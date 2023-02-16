@@ -150,3 +150,23 @@ TEST_CASE("Test pre iterator--")
         CHECK((--it)->second == 2);
         CHECK((--it)->second == 1);
 }
+
+TEST_CASE("Test pre mix iterator -- ++") 
+{
+        NAME_SPACE::map<int, char> map;
+
+        map.insert(NAME_SPACE::make_pair(0, 0));
+        map.insert(NAME_SPACE::make_pair(1, 1));
+        map.insert(NAME_SPACE::make_pair(2, 2));
+        CHECK(map[0] == 0);
+        CHECK(map[1] == 1);
+        CHECK(map[2] == 2);
+        NAME_SPACE::map<int, char>::iterator it = map.end();
+
+        
+        CHECK((--it)->second == 2);
+        CHECK((--it)->second == 1);
+        CHECK((++it)->second == 2);
+        CHECK((++it) == map.end());
+
+}

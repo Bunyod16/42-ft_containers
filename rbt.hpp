@@ -272,6 +272,8 @@ public:
 				break;
 			}
 		}
+		_sentinal->_right = _root;
+		_sentinal->_left = _root;
 		_root->_color = 0;
 	}
 
@@ -380,7 +382,6 @@ public:
 		node_pointer y = _sentinal;
 		node_pointer x = _root;
 
-		std::cout << "INSERTING NODE WITH KEY: " << node->_data.first << std::endl;
 		while (!x->_is_sentinal)
         {
 			y = x;
@@ -396,13 +397,12 @@ public:
 		// y is parent of x
 		node->_parent = y;
 		if (y->_is_sentinal) {
-			std::cout << "ROOT CHANGED" << std::endl;
 			_root = node;
+			_sentinal->_right = _root;
+			_sentinal->_left = _root;
 		} else if (_comp(node->_data, y->_data)) {
-			std::cout << "LEFT NODE" << y->_data.first << std::endl;
 			y->_left = node;
 		} else {
-			std::cout << "RIGHT NODE" << y->_data.first << std::endl;
 			y->_right = node;
 		}
 
@@ -410,7 +410,6 @@ public:
 		_size++;
 		if (node->_parent->_is_sentinal){
 			node->_color = 0;
-			std::cout << "ROOT COLORED BLACK" << std::endl;
 			return (node);
 		}
 
@@ -420,9 +419,8 @@ public:
 		}
 
 		// Fix the tree
-		std::cout << "FIXING TREE" << std::endl;
 		fixInsert(node);
-		std::cout << "NEW ROOT: " << _root->_data.first << std::endl;
+		
 		return (node);
 	}
 

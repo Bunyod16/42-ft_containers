@@ -389,6 +389,7 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 			// if node has a _left child
 			if (_ptr->_is_sentinal)
 			{
+				std::cout << "is sentinel " << _ptr->_is_sentinal << std::endl;
 				_ptr = max();
 				std::cout << "was sentinel now is " << _ptr->_data.first << std::endl;
 				return *this;
@@ -425,6 +426,7 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 			// if node has a _left child
 			if (_ptr->_is_sentinal)
 			{
+				
 				std::cout << "min called" << std::endl;
 				_ptr = max();
 				return tmp;
