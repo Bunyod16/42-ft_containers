@@ -79,9 +79,9 @@ class map
 				node_pointer node;
 
 				node = _rbt.find_key(key);
-				if (node->_data.first != key)
+				if (node->_data->first != key)
 					throw std::out_of_range("No such key exists");
-				return (node->_data.second);
+				return (node->_data->second);
 			};
 
 			const T& at( const Key& key ) const
@@ -89,9 +89,9 @@ class map
 				node_pointer node;
 
 				node = _rbt.find_key(key);
-				if (node->_data.first != key)
+				if (node->_data->first != key)
 					throw std::out_of_range("No such key exists");
-				return (node->_data.second);
+				return (node->_data->second);
 			};
 
 			T& operator[]( const Key& key )
@@ -99,8 +99,8 @@ class map
 				node_pointer node;
 
 				node = _rbt.find_key(key);
-				if (node->_data.first == key) 
-					return (node->_data.second);
+				if (node->_data->first == key) 
+					return (node->_data->second);
 				else
 					return ((*insert(make_pair(key, mapped_type())).first).second);
 			};
@@ -108,7 +108,6 @@ class map
 			// Iterators
 			iterator begin()
 			{
-				std::cout << "BEGIN: " << _rbt.min(_rbt.get_root())->_data.first << std::endl;
 				return (iterator(_rbt.min(_rbt.get_root())));
 			};
 
@@ -148,7 +147,7 @@ class map
 			//Modifiers
 			void clear() 
 			{
-				// _rbt.clear();
+				_rbt.clear(_rbt.get_root());
 			}
 
 			ft::pair<iterator, bool> insert( const value_type& value ) {

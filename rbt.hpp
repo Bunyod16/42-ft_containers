@@ -12,7 +12,7 @@ class RBTree {
 		typedef typename T::second_type mapped_type;
         typedef Compare value_comp;
         typedef Allocator allocator_type;
-		typedef std::allocator<Node<T> > node_allocator;
+		typedef typename Allocator::template rebind<Node<T> >::other node_allocator;
 		typedef typename node_allocator::pointer node_pointer;
         typedef typename allocator_type::reference reference;
         typedef typename allocator_type::const_reference const_reference;
@@ -53,7 +53,8 @@ public:
 		new_val = _val_alloc.allocate(1);
 
 		_val_alloc.construct(new_val, val);
-		_node_alloc.construct(node, node_type(*new_val, nullptr, _sentinal, _sentinal, is_sentinal, 1));
+		_node_alloc.construct(node, node_type(new_val, nullptr, _sentinal, _sentinal, is_sentinal, 1));
+
 		return (node);
 	}
 
@@ -71,6 +72,12 @@ public:
 		_sentinal->_is_sentinal = true;
 		_root = _sentinal;
 	}
+
+	//constructor
+	// ~RBTree()
+	// {
+	// 	clear(min(get_root()));
+	// }
 
 	// find the node with the min key
 	node_pointer min(node_pointer node) {
@@ -112,9 +119,9 @@ public:
 	{
 		if (node == _sentinal)
 			return node;
-		if (_comp(val, node->_data))
+		if (_comp(val, *node->_data))
 			return find_val(node->_left, val);
-		if (_comp(node->_data, val))
+		if (_comp(*node->_data, val))
 			return find_val(node->_right, val);
 		return node;
 	}
@@ -385,7 +392,7 @@ public:
 		while (!x->_is_sentinal)
         {
 			y = x;
-			if (_comp(node->_data, x->_data))
+			if (_comp(*node->_data, *x->_data))
             {
 				x = x->_left;
 			}
@@ -400,7 +407,7 @@ public:
 			_root = node;
 			_sentinal->_right = _root;
 			_sentinal->_left = _root;
-		} else if (_comp(node->_data, y->_data)) {
+		} else if (_comp(*node->_data, *y->_data)) {
 			y->_left = node;
 		} else {
 			y->_right = node;
@@ -424,10 +431,6 @@ public:
 		return (node);
 	}
 
-	node_pointer getRoot(){
-		return this->_root;
-	}
-
 	void deleteNodeHelper(node_pointer node, node_pointer delete_node) {
 
 		node_pointer z = _sentinal;
@@ -438,7 +441,7 @@ public:
 				z = node;
 			}
 
-			if (_comp(node->_data, delete_node)) {
+			if (_comp(*node->_data, delete_node)) {
 				node = node->_right;
 			} else {
 				node = node->_left;
@@ -499,7 +502,7 @@ public:
 		   }
             
            std::string color = node->_color ? "RED" : "BLACK";
-		   std::cout<<node->_data.first << ":" << node->_data.second << " " << "(" << color << ")" << std::endl;
+		   std::cout<<node->_data->first << ":" << node->_data->second << " " << "(" << color << ")" << std::endl;
 		   printHelper(node->_left, indent, false);
 		   printHelper(node->_right, indent, true);
 		}
@@ -528,6 +531,26 @@ public:
 		return _sentinal;
 	}
 
+	void delete_node(node_pointer node)
+	{
+		_val_alloc.destroy((node->_data));
+		_val_alloc.deallocate((node->_data), 1);
+		_node_alloc.destroy(node);
+		_node_alloc.deallocate(node, 1);
+	}
+
+	void clear(node_pointer node)
+	{
+		prettyPrint();
+		// if (node->_is_sentinal)
+		// 	return;
+		// clear(node->_right);
+		// clear(node->_left);
+		(void)node;
+		delete_node(_root);
+		
+		_size--;
+	}
 };
 }
 
