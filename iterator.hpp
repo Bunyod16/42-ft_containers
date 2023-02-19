@@ -99,8 +99,9 @@ struct iterator {
 };
 
 template< class T1, class T2>
-struct pair
+class pair
 {
+	public:
 	typedef T1 first_type;
 	typedef T2 second_type;
 	T1 first;
@@ -119,43 +120,43 @@ struct pair
 		second = pr.second;
 		return (*this);
 	}
-
-	template <class A, class B>
-	friend bool operator==( const pair<A, B>& lhs, const pair<A, B>& rhs )
-	{
-		return (lhs.first == rhs.first && lhs.second == rhs.second);
-	}
-
-	template <class A, class B>
-	friend bool operator!=( const pair<A, B>& lhs, const pair<A, B>& rhs )
-	{
-		return (lhs.first != rhs.first && lhs.second != rhs.second);
-	}
-
-	template <class A, class B>
-	friend bool operator<( const pair<A, B>& lhs, const pair<A, B>& rhs )
-	{
-		return (lhs.first < rhs.first || (lhs.first < rhs.first && lhs.second < rhs.second));
-	}
-	
-	template <class A, class B>
-	friend bool operator<=(const pair<A, B> & lhs, const pair<A, B> & rhs)
-	{
-		return (!(rhs < lhs));
-	}
-	
-	template <class A, class B>
-	friend bool operator>(const pair<A, B> & lhs, const pair<A, B> & rhs)
-	{
-		return (rhs < lhs);
-	}
-	
-	template <class A, class B>
-	friend bool operator>=(const pair<A, B> & lhs, const pair<A, B> & rhs)
-	{
-		return (!(lhs < rhs));
-	}
 };
+
+template <class A, class B>
+bool operator==( const pair<A, B>& lhs, const pair<A, B>& rhs )
+{
+	return (lhs.first == rhs.first && lhs.second == rhs.second);
+}
+
+template <class A, class B>
+bool operator!=( const pair<A, B>& lhs, const pair<A, B>& rhs )
+{
+	return (lhs.first != rhs.first && lhs.second != rhs.second);
+}
+
+template <class A, class B>
+bool operator<( const pair<A, B>& lhs, const pair<A, B>& rhs )
+{
+	return (lhs.first < rhs.first || (lhs.first < rhs.first && lhs.second < rhs.second));
+}
+
+template <class A, class B>
+bool operator<=(const pair<A, B> & lhs, const pair<A, B> & rhs)
+{
+	return (!(rhs < lhs));
+}
+
+template <class A, class B>
+bool operator>(const pair<A, B> & lhs, const pair<A, B> & rhs)
+{
+	return (rhs < lhs);
+}
+
+template <class A, class B>
+bool operator>=(const pair<A, B> & lhs, const pair<A, B> & rhs)
+{
+	return (!(lhs < rhs));
+}
 
 template <class A, class B>
 ft::pair<A, B> make_pair( A t, B u )
@@ -459,11 +460,11 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 	    bool operator>(const map_iterator& rhs) const { return _ptr > rhs._ptr; }
 	    bool operator<=(const map_iterator& rhs) const { return _ptr <= rhs._ptr; }
 		bool operator>=(const map_iterator& rhs) const { return _ptr >= rhs._ptr; }
-		reference	operator*(void) const { return (this->_ptr->_data); }
-		pointer		operator->(void) const { return (&this->_ptr->_data); }
+		reference	operator*(void) const { return (*this->_ptr->_data); }
+		pointer		operator->(void) const { return (this->_ptr->_data); }
+		node_pointer _ptr;
 	    // arithmetic operators
 		private:
-			node_pointer _ptr;
 
 			node_pointer max()
 			{

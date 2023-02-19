@@ -4,7 +4,7 @@ SOURCES = main.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 
 CC = g++
-CFLAGS = -Wall -Wextra -Werror -std=c++98
+CFLAGS = -Wall -Wextra -Werror -Wno-deprecated-declarations -std=c++98
 
 TESTDIR = test
 
@@ -32,6 +32,7 @@ $(MAPTEST)ft: clean
 $(MAPTEST)std: clean
 	$(CC) -c $(CFLAGS) $(TESTDIR)/map.cpp -DNAME_SPACE=std
 	$(CC) $(CFLAGS) -fsanitize=address -DNAME_SPACE=std $(TESTDIR)/map.cpp -g3 -o $@ 
+	./$(MAPTEST)std
 
 %.o: %.cpp
 	

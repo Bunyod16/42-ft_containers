@@ -62,11 +62,24 @@ class map
 			// template< class InputIt >
 			// map( InputIt first, InputIt last, const Compare& comp = Compare(), const Allocator& alloc = Allocator() ) {};
 
-			// map( const map& other ) {};
+			map( const map& other ) : _rbt(other._rbt),
+                                        _alloc(other._alloc),
+                                        _key_compare(other._key_compare) {}
 
 			~map() {};
 
-			map& operator=( const map& other );
+			map& operator=( const map& other )
+            {
+                _alloc = other._alloc;
+                _key_compare = other._key_compare;
+                map &non_const_other = const_cast<map&>(other);
+                clear();
+                for (map::iterator it = non_const_other.begin(); it != non_const_other.end(); it++)
+                {
+                    insert(*it);
+                }
+                return (*this);
+            } 
 
 			allocator_type get_allocator() const
 			{
@@ -108,12 +121,12 @@ class map
 			// Iterators
 			iterator begin()
 			{
-				return (iterator(_rbt.min(_rbt.get_root())));
+				return (iterator(_rbt.begin()));
 			};
 
 			const_iterator begin() const
 			{
-				return (const_iterator(&_rbt.min(_rbt.get_root())));
+				return (const_iterator(_rbt.begin()));
 			};
 			
 			iterator end()
@@ -147,45 +160,161 @@ class map
 			//Modifiers
 			void clear() 
 			{
-				_rbt.clear(_rbt.get_root());
+				_rbt.clear();
 			}
 
-			ft::pair<iterator, bool> insert( const value_type& value ) {
-				node_pointer node;
-				node = _rbt.insert(value);
-
-				return (ft::make_pair(iterator(node), true)); //TODO unhardcode
+			ft::pair<iterator, bool> insert( const value_type& value )
+            {
+                if (_rbt.find_val(_rbt.get_root(), value) == _rbt.get_sentinal())
+				    return (ft::make_pair(iterator(_rbt.insert(value)), true));
+                else
+                    return (ft::make_pair(iterator(_rbt.get_sentinal()), false));
 			};
 
 			template< class InputIt >
-			void insert( InputIt first, InputIt last );
+			void insert( InputIt first, InputIt last, typename ft::enable_if<!std::is_integral<InputIt>::value, InputIt>::type* = nullptr )
+            {
+                
+                // _rbt.prettyPrint();
+                for (; first != last; first++)
+                {
+                    // std::cout << "key: " << first->first << " val: " << first->second << std::endl;
+                    if (_rbt.find_val(_rbt.get_root(), *first) == _rbt.get_sentinal())
+                    {
+                        // std::cout << "INSERTING" << std::endl;
+				        _rbt.insert(*first);
+                    }
 
-			iterator erase( iterator pos );
+                }
+            }
 
-			iterator erase( iterator first, iterator last );
+			void erase( iterator pos )
+            {
+                iterator first = begin();
+                while (first != end())
+                {
+                    if (first == pos)
+					{
+                        _rbt.deleteNode(pos->first);
+						break;
+					}
+					first++;
+                }
+            }
 
-			size_type erase( const Key& key );
+			void erase( iterator first, iterator last )
+            {
+                while (first != last)
+                    _rbt.deleteNode((first++)->first);
+            }
 
-			void swap( map& other );
+			size_type erase( const Key& key )
+            {
+                if (_rbt.find_key(key) != _rbt.get_sentinal())
+                {
+                    _rbt.deleteNode(key);
+                    return (1);
+                }
+                return (0);
+            }
+
+			void swap( map& other )
+			{
+				key_compare	 temp_key_compare(other._key_compare);
+				other._key_compare = _key_compare;
+				_key_compare = temp_key_compare;
+
+				_rbt.swap_tree(other._rbt);
+			}
 
 			//Lookup
-			size_type count( const Key& key ) const;
+			size_type count( const Key& key ) const
+			{
+				node_pointer node;
+	
+				node = _rbt.find_key(key);
+				if (!node->_is_sentinal)
+						return (1);
+				return (0);
+			}
 
-			iterator find( const Key& key );
+			iterator find( const Key& key )
+			{
+				node_pointer node;
+	
+				node = _rbt.find_key(key);
+				return (iterator(node));
+			}
 
-			const_iterator find( const Key& key ) const;
+			const_iterator find( const Key& key ) const
+			{
+				node_pointer node;
+	
+				node = _rbt.find_key(key);
+				return (const_iterator(node));
+			}
 
-			ft::pair<iterator,iterator> equal_range( const Key& key );
+			ft::pair<iterator,iterator> equal_range( const Key& key )
+			{
+				return (ft::make_pair(lower_bound(key), upper_bound(key)));
+			}
 
-			ft::pair<const_iterator,const_iterator> equal_range( const Key& key ) const;
+			ft::pair<const_iterator,const_iterator> equal_range( const Key& key ) const
+			{
+				return (ft::make_pair(lower_bound(key), upper_bound(key)));
+			}
 
-			iterator lower_bound( const Key& key );
+			iterator lower_bound( const Key& key )
+			{
+				iterator it = begin();
 
-			const_iterator lower_bound( const Key& key ) const;
+				while (it != end())
+				{
+					if (_key_compare((*it).first, key) == 0)
+						return (it);
+					it++;
+				}
+				return (find(key));
+			}
 
-			iterator upper_bound( const Key& key );
+			const_iterator lower_bound( const Key& key ) const
+			{
+				iterator it = begin();
 
-			const_iterator upper_bound( const Key& key ) const;
+				while (it != end())
+				{
+					if (_key_compare((*it).first, key) == 0)
+						return (it);
+					it++;
+				}
+				return (find(key));
+			}
+
+			iterator upper_bound( const Key& key )
+			{
+				iterator it = begin();
+
+				while (it != end())
+				{
+					if (_key_compare((*it).first, key) == 1)
+						return (it);
+					it++;
+				}
+				return (end());
+			}
+
+			const_iterator upper_bound( const Key& key ) const
+			{
+				iterator it = begin();
+
+				while (it != end())
+				{
+					if (_key_compare((*it).first, key) == 1)
+						return (it);
+					it++;
+				}
+				return (end());
+			}
 
 			key_compare key_comp() const;
 

@@ -58,6 +58,20 @@ public:
 		return (node);
 	}
 
+	node_pointer copy_node(node_pointer to_copy)
+	{
+		node_pointer node;
+		pointer new_val;
+
+		node = _node_alloc.allocate(1);
+		new_val = _val_alloc.allocate(1);
+
+		_val_alloc.construct(new_val, *to_copy->_data);
+		_node_alloc.construct(node, node_type(new_val, nullptr, _sentinal, _sentinal, false, to_copy->_color));
+
+		return (node);
+	}
+
 	//constructor
 	RBTree(const value_comp comp = value_comp(), const Allocator alloc = Allocator()) : _val_alloc(alloc),
 																							_comp(comp),
@@ -73,11 +87,59 @@ public:
 		_root = _sentinal;
 	}
 
-	//constructor
-	// ~RBTree()
-	// {
-	// 	clear(min(get_root()));
-	// }
+	RBTree(const RBTree &other) : _node_alloc(other._node_alloc),
+									_val_alloc(other._val_alloc),
+									_comp(other._comp),	
+									_size(other._size)
+	{
+		_sentinal = create_node(value_type()) ;
+		_sentinal->_parent = _sentinal;
+		_sentinal->_color = 0;
+		_sentinal->_left = _sentinal;
+		_sentinal->_right = _sentinal;
+		_sentinal->_is_sentinal = true;
+		_root = _sentinal;
+		if (other.size() == 0)
+		{
+			return ;
+		}
+
+		replicate(other._root, _root);
+	}
+
+	RBTree& operator=( const RBTree& other )
+    {
+		if (_size > 0)
+			clear(get_root());
+		_size = other._size;
+		if (other._root == other._sentinal)
+			return (*this);
+		replicate(_root, other._root);
+		return (*this);
+		// _root = _sentinal;
+		// _val_alloc = other._val_alloc;
+		// _comp = other._comp;
+		// _size = other._size;
+        // _node_alloc = other._node_alloc;
+
+		// if (other.size() == 0)
+		// 	return (*this);
+		// _root = replicate(_root, other._root);
+		// _sentinal->_right = _root;
+		// _sentinal->_left = _root;
+		// prettyPrint();
+		// std::cout << "ROOT SEN: " << _root->_is_sentinal << std::endl;
+		// std::cout << "OTHER ROOT SEN: " << other._root->_is_sentinal << std::endl;
+		// // other.prettyPrint();
+    } 
+
+	//destructor
+	~RBTree()
+	{
+		if (_size > 0)
+			clear();
+		delete_node(_sentinal);
+	}
 
 	// find the node with the min key
 	node_pointer min(node_pointer node) {
@@ -102,7 +164,7 @@ public:
 
 	iterator end()
 	{
-		return (iterator(max(_root)));
+		return (iterator(get_sentinal()));
 	}
 
 	reverse_iterator rbegin()
@@ -112,12 +174,13 @@ public:
 
 	reverse_iterator rend()
 	{
-		return (reverse_iterator(min(_root)));
+		return (reverse_iterator(get_sentinal()));
 	}
 
 	node_pointer	find_val(node_pointer node, const value_type &val) const
 	{
-		if (node == _sentinal)
+		// std::cout << "IN" << std::endl;
+		if (node->_is_sentinal)
 			return node;
 		if (_comp(val, *node->_data))
 			return find_val(node->_left, val);
@@ -431,65 +494,81 @@ public:
 		return (node);
 	}
 
-	void deleteNodeHelper(node_pointer node, node_pointer delete_node) {
+	void delete_node(node_pointer node)
+	{
+		_val_alloc.destroy((node->_data));
+		_val_alloc.deallocate((node->_data), 1);
+		_node_alloc.destroy(node);
+		_node_alloc.deallocate(node, 1);
+	}
 
-		node_pointer z = _sentinal;
+	void deleteNodeHelper(node_pointer to_delete) {
+
 		node_pointer x, y;
 
-		while (node != _sentinal){
-			if (node->_data == delete_node) {
-				z = node;
-			}
-
-			if (_comp(*node->_data, delete_node)) {
-				node = node->_right;
-			} else {
-				node = node->_left;
-			}
-		}
-
-		if (z == _sentinal) {
-			std::cout<<"Couldn't find key in the tree"<<std::endl;
+		if (to_delete == _sentinal) {
 			return;
 		} 
 
-		y = z;
+		y = to_delete;
 		int y_original_color = y->_color;
-		if (z->_left == _sentinal) {
-			x = z->_right;
-			rbTransplant(z, z->_right);
-		} else if (z->_right == _sentinal) {
-			x = z->_left;
-			rbTransplant(z, z->_left);
+		if (to_delete->_left == _sentinal) {
+			x = to_delete->_right;
+			rbTransplant(to_delete, to_delete->_right);
+		} else if (to_delete->_right == _sentinal) {
+			x = to_delete->_left;
+			rbTransplant(to_delete, to_delete->_left);
 		} else {
-			y = min(z->_right);
+			y = min(to_delete->_right);
 			y_original_color = y->_color;
 			x = y->_right;
-			if (y->_parent == z) {
+			if (y->_parent == to_delete) {
 				x->_parent = y;
 			} else {
 				rbTransplant(y, y->_right);
-				y->_right = z->_right;
+				y->_right = to_delete->_right;
 				y->_right->_parent = y;
 			}
 
-			rbTransplant(z, y);
-			y->_left = z->_left;
+			rbTransplant(to_delete, y);
+			y->_left = to_delete->_left;
 			y->_left->_parent = y;
-			y->_color = z->_color;
+			y->_color = to_delete->_color;
 		}
-		_node_alloc.deallocate(z);
-		if (y_original_color == 0){
+		delete_node(to_delete);
+		_size--;
+		if (_size == 1)
+		{
+			_root = x;
+			x->_color = 0;
+			x->_parent = _sentinal;
+			_sentinal->_right = _root;
+			_sentinal->_left = _root;
+		}
+		if (y_original_color == 0 && _size != 0)
+		{
 			fixDelete(x);
 		}
+		if (_size == 0)
+		{
+			_sentinal->_color = 0;
+			_sentinal->_is_sentinal = true;
+			_sentinal->_parent = _sentinal;
+			_sentinal->_left = _sentinal;
+			_sentinal->_right = _sentinal;
+			_root = _sentinal;
+			_size = 0;
+		}
 	}
 
-	void deleteNode(key_type key) {
-		node_pointer val = find_val(key);
-		deleteNodeHelper(_root, val);
+	void deleteNode(key_type key)
+	{
+		node_pointer val = find_key(key);
+		if (!val->_is_sentinal)
+			deleteNodeHelper(val);
 	}
 
-	void printHelper(node_pointer node, std::string indent, bool last) {
+	void printHelper(node_pointer node, std::string indent, bool last) const {
 		// print the tree structure on the screen
 	   	if (!node->_is_sentinal) {
 		   std::cout<<indent;
@@ -509,14 +588,14 @@ public:
 		// std::cout<<root->left->data<<std::endl;
 	}
 
-	void prettyPrint() {
+	void prettyPrint() const {
 		
 	    if (!_root->_is_sentinal) {
     		printHelper(_root, "", true);
 	    }
 	}
 
-	node_pointer find_key(key_type key)
+	node_pointer find_key(key_type key) const
 	{
 		node_pointer node;
 
@@ -526,30 +605,71 @@ public:
 		return (node);
 	}
 
-	node_pointer get_sentinal()
+	node_pointer get_sentinal() const
 	{
 		return _sentinal;
 	}
 
-	void delete_node(node_pointer node)
+	void clear()
 	{
-		_val_alloc.destroy((node->_data));
-		_val_alloc.deallocate((node->_data), 1);
-		_node_alloc.destroy(node);
-		_node_alloc.deallocate(node, 1);
+		rec_del_node(_root);
+		_sentinal->_color = 0;
+		_sentinal->_is_sentinal = true;
+		_sentinal->_parent = _sentinal;
+		_sentinal->_left = _sentinal;
+		_sentinal->_right = _sentinal;
+		_root = _sentinal;
+		_size = 0;
+	}
+	
+	void rec_del_node(node_pointer node)
+	{
+		if (node->_is_sentinal)
+			return;
+		rec_del_node(node->_right);
+		rec_del_node(node->_left);
+		delete_node(node);
 	}
 
-	void clear(node_pointer node)
+	node_pointer replicate(node_pointer node, node_pointer src_node)
 	{
-		prettyPrint();
-		// if (node->_is_sentinal)
-		// 	return;
-		// clear(node->_right);
-		// clear(node->_left);
-		(void)node;
-		delete_node(_root);
-		
-		_size--;
+		if (src_node->_is_sentinal)
+			return node;
+		node = copy_node(src_node);
+		// std::cout << "copied one node is sen: " << node->_is_sentinal << std::endl;
+		if (!src_node->_left->_is_sentinal) {
+			replicate(node->_left, src_node->_left);
+			node->_left->_parent = node;
+		}
+		if (!src_node->_right->_is_sentinal) {
+			replicate(node->_right, src_node->_right);
+			node->_right->_parent = node;
+		}
+		return node;
+	}
+
+	void swap_tree(RBTree &other)
+	{
+		node_pointer temp_root(other._root);
+		node_pointer temp_sentinal(other._sentinal);
+		node_allocator temp_node_alloc(other._node_alloc);
+		allocator_type temp_val_alloc(other._val_alloc);
+		value_comp temp_comp(other._comp);
+		size_t temp_size(other._size);
+
+		other._root = _root;
+		other._sentinal = _sentinal;
+		other._node_alloc = _node_alloc;
+		other._val_alloc = _val_alloc;
+		other._comp = _comp;
+		other._size = _size;
+
+		_root = temp_root;
+		_sentinal = temp_sentinal;
+		_node_alloc = temp_node_alloc;
+		_val_alloc = temp_val_alloc;
+		_comp = temp_comp;
+		_size = temp_size;
 	}
 };
 }
