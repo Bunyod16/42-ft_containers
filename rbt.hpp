@@ -579,6 +579,15 @@ public:
 		_size--;
 		if (y_original_color == 0)
 			fixDelete(x);
+		if (_size == 0)
+		{
+			_sentinal->_parent = _sentinal;
+			_sentinal->_color = 0;
+			_sentinal->_left = _sentinal;
+			_sentinal->_right = _sentinal;
+			_sentinal->_is_sentinal = true;
+			_root = _sentinal;
+		}
 	}
 
 	void deleteNode(key_type key)

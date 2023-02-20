@@ -151,22 +151,22 @@ class map
 
 			reverse_iterator rbegin()
 			{
-				return (reverse_iterator(_rbt.rend()));
+				return (reverse_iterator(_rbt.get_sentinal()));
 			}
 
 			const_reverse_iterator rbegin() const
 			{
-				return (const_reverse_iterator(_rbt.rend()));
+				return (const_reverse_iterator(begin()));
 			}
 
 			reverse_iterator rend()
 			{
-				return (reverse_iterator(end()));
+				return (reverse_iterator(begin()));
 			}
 
 			const_reverse_iterator rend() const
 			{
-				return (reverse_iterator(end()));
+				return (reverse_iterator(_rbt.get_sentinal()));
 			}
 			//Capacity
 			bool empty() const
@@ -371,36 +371,28 @@ class map
 		{
 			if (lhs.size() != rhs.size())
 				return false;
-			typename ft::map<K,V,Comp,Alloc>::const_iterator l, r;
-			l = lhs.begin();
-			r = rhs.begin();
-			while (l != lhs.end() && *l == *r)
+			typename ft::map<K,V,Comp,Alloc>::const_iterator lb, rb, le, re;
+			lb = lhs.begin();
+			rb = rhs.begin();
+			le = lhs.end();
+			re = rhs.end();
+			while (lb != le && rb != re)
 			{
-				l++;
-				r++;
-				if (*l != *r)
-					return false;
+				if (lb->first != rb->first || lb->second != rb->second)
+					return (false);
+				lb++;
+				rb++;
 			}
-			return true;
+			if (lb->first != rb->first || lb->second != rb->second)
+				return (false);
+			return (true);
 		}
 
 		template< class K, class V, class Comp, class Alloc >
 		bool operator!=( const ft::map<K,V,Comp,Alloc>& lhs,
 						 const ft::map<K,V,Comp,Alloc>& rhs )
 		{
-			if (lhs.size() != rhs.size())
-				return true;
-			typename ft::map<K,V,Comp,Alloc>::const_iterator l, r;
-			l = lhs.begin();
-			r = rhs.begin();
-			while (l != lhs.end() && *l == *r)
-			{
-				l++;
-				r++;
-				if (*l != *r)
-					return true;
-			}
-			return false;
+			return (!(lhs == rhs));
 		}
 
 		template< class K, class V, class Comp, class Alloc >
@@ -414,21 +406,21 @@ class map
 		bool operator<=( const ft::map<K,V,Comp,Alloc>& lhs,
 						 const ft::map<K,V,Comp,Alloc>& rhs )
 		{
-			return (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()) || lhs == rhs);
+			return (!(rhs < lhs));
 		} // ft equals too
 
 		template< class K, class V, class Comp, class Alloc >
 		bool operator>( const ft::map<K,V,Comp,Alloc>& lhs,
 						const ft::map<K,V,Comp,Alloc>& rhs )
 		{
-			return (ft::lexicographical_compare(rhs.begin(), rhs.end(), lhs.begin(), lhs.end()));
+			return (rhs < lhs);
 		} //rb re lb le
 
 		template< class K, class V, class Comp, class Alloc >
 		bool operator>=( const ft::map<K,V,Comp,Alloc>& lhs,
 						 const ft::map<K,V,Comp,Alloc>& rhs )
 		{
-			return (ft::lexicographical_compare(rhs.begin(), rhs.end(), lhs.begin(), lhs.end()) || lhs == rhs);
+			return (!(lhs < rhs));
 		} // rb re  lb le fteq
 
 }

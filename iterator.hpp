@@ -78,7 +78,7 @@ template<class InputIt1, class InputIt2, class Compare>
 bool lexicographical_compare(InputIt1 first1, InputIt1 last1,
     							InputIt2 first2, InputIt2 last2, Compare comp)
 {
-    for (; (first1 != last1) && (first2 != last2); ++first1, (void) ++first2)
+    for (; (first1 != last1) && (first2 != last2); ++first1, ++first2)
     {
         if (comp(*first1, *first2))
             return true;
@@ -228,6 +228,19 @@ class VecRevIterator : public std::iterator<std::random_access_iterator_tag, T>
 	private:
 		iterator_type _ptr;
 };
+
+template <class Iter1, class Iter2>
+bool operator==(const VecRevIterator<Iter1> &lhs, const VecRevIterator<Iter2> &rhs)
+{
+	return (lhs.base() == rhs.base());
+}
+
+template <class Iter1, class Iter2>
+bool operator!=(const VecRevIterator<Iter1> &lhs, const VecRevIterator<Iter2> &rhs)
+{
+	return (lhs.base() != rhs.base());
+}
+
 
 template <typename T>
 class VecIterator : public std::iterator<std::random_access_iterator_tag, T>
