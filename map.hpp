@@ -244,7 +244,7 @@ class map
 			void erase( iterator first, iterator last )
             {
                 while (first != last)
-                    _rbt.deleteNode((first++)->first);
+                    _rbt.deleteNode((*first++).first);
             }
 
 			size_type erase( const Key& key )
@@ -335,7 +335,7 @@ class map
 
 				while (it != end())
 				{
-					if (_key_compare((*it).first, key) == 1)
+					if (_key_compare(key, (*it).first) == 1)
 						return (it);
 					it++;
 				}
@@ -348,7 +348,7 @@ class map
 
 				while (it != end())
 				{
-					if (_key_compare((*it).first, key) == 1)
+					if (_key_compare(key, (*it).first) == 1)
 						return (it);
 					it++;
 				}

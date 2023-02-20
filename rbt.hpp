@@ -89,8 +89,7 @@ public:
 
 	RBTree(const RBTree &other) : _node_alloc(other._node_alloc),
 									_val_alloc(other._val_alloc),
-									_comp(other._comp),	
-									_size(other._size)
+									_comp(other._comp)
 	{
 		_sentinal = create_node(value_type()) ;
 		_sentinal->_parent = _sentinal;
@@ -100,11 +99,15 @@ public:
 		_sentinal->_is_sentinal = true;
 		_root = _sentinal;
 		if (other.size() == 0)
-		{
 			return ;
+		// _root = replicate(_root, other._root);
+		const_iterator it = other.begin();
+		while (it != other.end())
+		{
+			insert(*it);
+			it++;
 		}
-
-		replicate(other._root, _root);
+		// std::cout << "RAN " << _root->_is_sentinal << std::endl;
 	}
 
 	RBTree& operator=( const RBTree& other )
@@ -652,6 +655,7 @@ public:
 	{
 		if (src_node->_is_sentinal)
 			return node;
+		std::cout << "ran" << std::endl;
 		node = copy_node(src_node);
 		// std::cout << "copied one node is sen: " << node->_is_sentinal << std::endl;
 		if (!src_node->_left->_is_sentinal) {

@@ -344,9 +344,11 @@ class   map_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
 			if (!_ptr->_right->_is_sentinal)
 			{
 				_ptr = _ptr->_right;
+
 				while (!_ptr->_left->_is_sentinal) {
 					_ptr = _ptr->_left;
 				}
+
 			}
 			else
 			{
