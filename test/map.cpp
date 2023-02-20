@@ -60,6 +60,32 @@ TEST_CASE("Test insert iterator") {
     CHECK(map[3] == 0);
 }
 
+TEST_CASE("Test insert position") {
+    NAME_SPACE::map<int, char> map, copy_map;
+
+    map.insert(NAME_SPACE::make_pair(1, 't'));
+    map.insert(NAME_SPACE::make_pair(2, 'e'));
+    map.insert(NAME_SPACE::make_pair(3, 's'));
+    CHECK(map[1] == 't');
+    CHECK(map[2] == 'e');
+    CHECK(map[3] == 's');
+
+    copy_map.insert(NAME_SPACE::make_pair(1, 'A'));
+    copy_map.insert(map.begin(), map.end());
+    CHECK(copy_map[1] == 'A');
+    CHECK(copy_map[2] == 'e');
+    CHECK(copy_map[3] == 's');
+    map[1] = 0;
+    map[2] = 0;
+    map[3] = 0;
+    CHECK(copy_map[1] == 'A');
+    CHECK(copy_map[2] == 'e');
+    CHECK(copy_map[3] == 's');
+    CHECK(map[1] == 0);
+    CHECK(map[2] == 0);
+    CHECK(map[3] == 0);
+}
+
 TEST_CASE("Test at") {
     NAME_SPACE::map<int, char> map;
 

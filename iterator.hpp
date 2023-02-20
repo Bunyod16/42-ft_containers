@@ -178,11 +178,17 @@ class VecRevIterator : public std::iterator<std::random_access_iterator_tag, T>
 	    // constructor
 	    VecRevIterator() : _ptr(nullptr) {};
 
-		explicit VecRevIterator( iterator_type x) : _ptr(x._ptr - 1) {};
+		iterator_type base(void) const
+		{
+			return _ptr;
+		}
+
+		explicit VecRevIterator( iterator_type x) : _ptr(x) {}
 		
 		template<class U>
-		VecRevIterator(const VecRevIterator<U> &other) : _ptr(other._ptr) {};
+		VecRevIterator(const VecRevIterator<U> &other) : _ptr(other.base()) {}
 
+		~VecRevIterator() {}
 	    // increment/decrement operators
 	    VecRevIterator& operator++() { --_ptr; return *this; }
 	    VecRevIterator& operator--() { ++_ptr; return *this; }
@@ -197,8 +203,18 @@ class VecRevIterator : public std::iterator<std::random_access_iterator_tag, T>
 	    VecRevIterator& operator-=(difference_type n) { _ptr -= n; return *this; }
 
 	    // dereference operator
-	    T& operator*() const { return *_ptr; }
-	    T* operator->() const { return _ptr; }
+	    reference operator*() const
+		{
+			iterator_type temp = _ptr;
+
+			return *(--temp);
+		}
+
+	    pointer operator->() const
+		{
+			return &(operator*());
+		}
+
 	    T& operator[](difference_type n) const { return _ptr[n]; }
 
 	    // comparison operators
@@ -210,7 +226,7 @@ class VecRevIterator : public std::iterator<std::random_access_iterator_tag, T>
 		bool operator>=(const VecRevIterator& rhs) const { return _ptr >= rhs._ptr; }
 
 	private:
-		T* _ptr;
+		iterator_type _ptr;
 };
 
 template <typename T>

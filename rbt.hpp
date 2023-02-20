@@ -142,7 +142,8 @@ public:
 	}
 
 	// find the node with the min key
-	node_pointer min(node_pointer node) {
+	node_pointer min(node_pointer node) const
+	{
 		while (node->_left != _sentinal) {
 			node = node->_left;
 		}
@@ -150,7 +151,8 @@ public:
 	}
 
 	// find the node with the max key
-	node_pointer max(node_pointer node) {
+	node_pointer max(node_pointer node) const
+	{
 		while (node->_right != _sentinal) {
 			node = node->_right;
 		}
@@ -162,9 +164,19 @@ public:
 		return (iterator(min(_root)));
 	}
 
+	const_iterator begin() const
+	{
+		return (const_iterator(min(_root)));
+	}
+
 	iterator end()
 	{
 		return (iterator(get_sentinal()));
+	}
+
+	const_iterator end() const
+	{
+		return (const_iterator(get_sentinal()));
 	}
 
 	reverse_iterator rbegin()
@@ -490,7 +502,6 @@ public:
 
 		// Fix the tree
 		fixInsert(node);
-		
 		return (node);
 	}
 
@@ -676,6 +687,11 @@ public:
 		_val_alloc = temp_val_alloc;
 		_comp = temp_comp;
 		_size = temp_size;
+	}
+
+	value_comp get_compare() const
+	{
+		return _comp;
 	}
 };
 }

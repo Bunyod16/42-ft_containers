@@ -24,7 +24,7 @@ class map
 		typedef ft::map_iterator<value_type> iterator;
 		typedef ft::map_iterator<const value_type> const_iterator;
 		typedef ft::VecRevIterator<iterator> reverse_iterator;
-		typedef ft::VecRevIterator<const iterator> const_reverse_iterator;
+		typedef ft::VecRevIterator<const_iterator> const_reverse_iterator;
 		typedef size_t size_type;
 
 		class value_compare : public std::binary_function<value_type, value_type, bool>
@@ -59,8 +59,18 @@ class map
 					_alloc(alloc),
 					_key_compare(comp) {}
 
-			// template< class InputIt >
-			// map( InputIt first, InputIt last, const Compare& comp = Compare(), const Allocator& alloc = Allocator() ) {};
+			template< class InputIt >
+			map( InputIt first, InputIt last, const Compare& comp = Compare(), const Allocator& alloc = Allocator() ) :
+					_rbt(comp, alloc),
+					_alloc(alloc),
+					_key_compare(comp)
+			{
+				while (first != last)
+				{
+					_rbt.insert(*first);
+					first++;
+				}
+			}
 
 			map( const map& other ) : _rbt(other._rbt),
                                         _alloc(other._alloc),
@@ -115,7 +125,7 @@ class map
 				if (node->_data->first == key) 
 					return (node->_data->second);
 				else
-					return ((*insert(make_pair(key, mapped_type())).first).second);
+					return ((*insert(ft::make_pair(key, mapped_type())).first).second);
 			};
 			
 			// Iterators
@@ -139,6 +149,25 @@ class map
 				return (const_iterator(_rbt.get_sentinal()));
 			};
 
+			reverse_iterator rbegin()
+			{
+				return (reverse_iterator(_rbt.rend()));
+			}
+
+			const_reverse_iterator rbegin() const
+			{
+				return (const_reverse_iterator(_rbt.rend()));
+			}
+
+			reverse_iterator rend()
+			{
+				return (reverse_iterator(end()));
+			}
+
+			const_reverse_iterator rend() const
+			{
+				return (reverse_iterator(end()));
+			}
 			//Capacity
 			bool empty() const
 			{
@@ -168,7 +197,7 @@ class map
                 if (_rbt.find_val(_rbt.get_root(), value) == _rbt.get_sentinal())
 				    return (ft::make_pair(iterator(_rbt.insert(value)), true));
                 else
-                    return (ft::make_pair(iterator(_rbt.get_sentinal()), false));
+                    return (ft::make_pair(iterator(_rbt.find_val(_rbt.get_root(), value)), false));
 			};
 
 			template< class InputIt >
@@ -187,6 +216,16 @@ class map
 
                 }
             }
+
+			iterator insert (iterator position, const value_type& val)
+			{
+				(void)position;
+				if (_rbt.find_val(_rbt.get_root(), val) == _rbt.get_sentinal())
+                {
+				    _rbt.insert(val);
+                }
+				return (iterator(_rbt.find_val(_rbt.get_root(), val)));
+			}
 
 			void erase( iterator pos )
             {
@@ -279,7 +318,7 @@ class map
 
 			const_iterator lower_bound( const Key& key ) const
 			{
-				iterator it = begin();
+				const_iterator it = begin();
 
 				while (it != end())
 				{
@@ -305,7 +344,7 @@ class map
 
 			const_iterator upper_bound( const Key& key ) const
 			{
-				iterator it = begin();
+				const_iterator it = begin();
 
 				while (it != end())
 				{
@@ -323,35 +362,74 @@ class map
 
 			map::value_compare value_comp() const
 			{
-				return _rbt._comp;
+				return _rbt.get_compare();
 			}
 };
 		template< class K, class V, class Comp, class Alloc >
-		bool operator==( const map<K,V,Comp,Alloc>& lhs,
-						 const map<K,V,Comp,Alloc>& rhs );
-			
-		template< class K, class V, class Comp, class Alloc >
-		bool operator!=( const map<K,V,Comp,Alloc>& lhs,
-						 const map<K,V,Comp,Alloc>& rhs );
+		bool operator==( const ft::map<K,V,Comp,Alloc>& lhs,
+						 const ft::map<K,V,Comp,Alloc>& rhs )
+		{
+			if (lhs.size() != rhs.size())
+				return false;
+			typename ft::map<K,V,Comp,Alloc>::const_iterator l, r;
+			l = lhs.begin();
+			r = rhs.begin();
+			while (l != lhs.end() && *l == *r)
+			{
+				l++;
+				r++;
+				if (*l != *r)
+					return false;
+			}
+			return true;
+		}
 
 		template< class K, class V, class Comp, class Alloc >
-		bool operator<( const map<K,V,Comp,Alloc>& lhs,
-						const map<K,V,Comp,Alloc>& rhs );
+		bool operator!=( const ft::map<K,V,Comp,Alloc>& lhs,
+						 const ft::map<K,V,Comp,Alloc>& rhs )
+		{
+			if (lhs.size() != rhs.size())
+				return true;
+			typename ft::map<K,V,Comp,Alloc>::const_iterator l, r;
+			l = lhs.begin();
+			r = rhs.begin();
+			while (l != lhs.end() && *l == *r)
+			{
+				l++;
+				r++;
+				if (*l != *r)
+					return true;
+			}
+			return false;
+		}
 
 		template< class K, class V, class Comp, class Alloc >
-		bool operator<=( const map<K,V,Comp,Alloc>& lhs,
-						 const map<K,V,Comp,Alloc>& rhs );
+		bool operator<( const ft::map<K,V,Comp,Alloc>& lhs,
+						const ft::map<K,V,Comp,Alloc>& rhs )
+		{
+			return (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
+		} //lb le rb re
 
 		template< class K, class V, class Comp, class Alloc >
-		bool operator>( const map<K,V,Comp,Alloc>& lhs,
-						const map<K,V,Comp,Alloc>& rhs );
+		bool operator<=( const ft::map<K,V,Comp,Alloc>& lhs,
+						 const ft::map<K,V,Comp,Alloc>& rhs )
+		{
+			return (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()) || lhs == rhs);
+		} // ft equals too
 
 		template< class K, class V, class Comp, class Alloc >
-		bool operator>=( const map<K,V,Comp,Alloc>& lhs,
-						 const map<K,V,Comp,Alloc>& rhs );
+		bool operator>( const ft::map<K,V,Comp,Alloc>& lhs,
+						const ft::map<K,V,Comp,Alloc>& rhs )
+		{
+			return (ft::lexicographical_compare(rhs.begin(), rhs.end(), lhs.begin(), lhs.end()));
+		} //rb re lb le
 
 		template< class K, class V, class Comp, class Alloc >
-		void swap( std::map<K,V,Comp,Alloc>& lhs,
-				std::map<K,V,Comp,Alloc>& rhs );
+		bool operator>=( const ft::map<K,V,Comp,Alloc>& lhs,
+						 const ft::map<K,V,Comp,Alloc>& rhs )
+		{
+			return (ft::lexicographical_compare(rhs.begin(), rhs.end(), lhs.begin(), lhs.end()) || lhs == rhs);
+		} // rb re  lb le fteq
+
 }
 #endif
