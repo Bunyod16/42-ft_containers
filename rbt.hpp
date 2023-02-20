@@ -284,7 +284,7 @@ public:
 
 
 	void rbTransplant(node_pointer u, node_pointer v){
-		if (u->_parent == nullptr) {
+		if (u->_parent->_is_sentinal) {
 			_root = v;
 		} else if (u == u->_parent->_left){
 			u->_parent->_left = v;
@@ -502,13 +502,39 @@ public:
 		_node_alloc.deallocate(node, 1);
 	}
 
+	void del_root()
+	{
+		node_pointer newroot;
+
+		if (_size == 1)
+		{
+
+		}
+		if (!_root->_left->_is_sentinal) 
+		{
+			newroot = _root->_left;
+			_sentinal->_left = newroot;
+			_sentinal->_right = newroot;
+			newroot->_parent = _sentinal;
+		}
+		else if (!_root->_right->_is_sentinal) 
+		{
+			newroot = _root->_right;
+			_sentinal->_left = newroot;
+			_sentinal->_right = newroot;
+			newroot->_parent = _sentinal;	
+		}
+
+		--_size;
+	}
+
 	void deleteNodeHelper(node_pointer to_delete) {
 
 		node_pointer x, y;
 
 		if (to_delete == _sentinal) {
 			return;
-		} 
+		}
 
 		y = to_delete;
 		int y_original_color = y->_color;
@@ -537,28 +563,8 @@ public:
 		}
 		delete_node(to_delete);
 		_size--;
-		if (_size == 1)
-		{
-			_root = x;
-			x->_color = 0;
-			x->_parent = _sentinal;
-			_sentinal->_right = _root;
-			_sentinal->_left = _root;
-		}
-		if (y_original_color == 0 && _size != 0)
-		{
+		if (y_original_color == 0)
 			fixDelete(x);
-		}
-		if (_size == 0)
-		{
-			_sentinal->_color = 0;
-			_sentinal->_is_sentinal = true;
-			_sentinal->_parent = _sentinal;
-			_sentinal->_left = _sentinal;
-			_sentinal->_right = _sentinal;
-			_root = _sentinal;
-			_size = 0;
-		}
 	}
 
 	void deleteNode(key_type key)

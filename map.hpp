@@ -316,9 +316,15 @@ class map
 				return (end());
 			}
 
-			key_compare key_comp() const;
+			key_compare key_comp() const
+			{
+				return _key_compare;
+			}
 
-			map::value_compare value_comp() const;
+			map::value_compare value_comp() const
+			{
+				return _rbt._comp;
+			}
 };
 		template< class K, class V, class Comp, class Alloc >
 		bool operator==( const map<K,V,Comp,Alloc>& lhs,
