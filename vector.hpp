@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+
 namespace ft {
 
 template <typename G>
@@ -31,6 +32,60 @@ class vector
 
 		typedef std::size_t										size_type;
 		typedef std::ptrdiff_t									difference_type;
+	
+	private:
+		allocator_type _allocator;
+		pointer _data;
+		size_t _size;
+		size_t _capacity;
+	
+	public:
+		// Iterators
+		iterator begin()
+		{
+			return (iterator(_data));
+		}
+
+		const_iterator begin() const
+		{
+			return (const_iterator(_data));
+		}
+
+		iterator end()
+		{
+			if (_size == 0)
+				return (begin());
+
+			return (iterator(begin() + _size));
+		}
+
+		const_iterator end() const
+		{
+			if (_size == 0)
+				return (begin());
+
+			return (const_iterator(begin() + _size));
+		}
+
+		reverse_iterator rbegin()
+		{
+			return (reverse_iterator(begin() + _size));
+		}
+		
+		const_reverse_iterator rbegin() const
+		{
+			return (const_reverse_iterator(begin() + _size));
+		}
+
+		reverse_iterator rend()
+		{
+			return (reverse_iterator(begin()));
+		}
+
+		const_reverse_iterator rend() const
+		{
+			return (const_reverse_iterator(begin()));
+		}
 
 		// Constructors
 		explicit vector (const allocator_type& alloc = allocator_type()) : _allocator(alloc)
@@ -75,56 +130,20 @@ class vector
 		// Destructor
 		~vector()
 		{
+			// delete[] _data;
+			clear();
+			// _data = _allocator.allocate(_capacity);
 			_allocator.deallocate(_data, _capacity);
 		}
 
 		// Accessor
 		vector &operator=(const vector& rhs)
 		{
-			_allocator.deallocate(_data, _size);
-			_allocator.allocate(rhs.size);
-			// TODO, TRAVERSE THRU
-		}
-
-		// Iterators
-		iterator begin()
-		{
-			return (iterator(_data));
-		}
-
-		const_iterator begin() const
-		{
-			return (const_iterator(_data));
-		}
-
-		iterator end()
-		{
-			return (iterator(begin() + _size));
-		}
-
-		const_iterator end() const
-		{
-			return (const_iterator(begin() + _size));
-		}
-
-		reverse_iterator rbegin()
-		{
-			return (reverse_iterator(begin() + _size));
-		}
-		
-		const_reverse_iterator rbegin() const
-		{
-			return (const_reverse_iterator(begin() + _size));
-		}
-
-		reverse_iterator rend()
-		{
-			return (reverse_iterator(begin()));
-		}
-
-		const_reverse_iterator rend() const
-		{
-			return (const_reverse_iterator(begin()));
+			clear(); //check if stops here
+			// _allocator.allocate(rhs.size());
+			for (const_iterator it = rhs.begin(); it != rhs.end(); it++)
+				push_back(*it);
+			return *this;
 		}
 
 		// Capacity
@@ -229,7 +248,7 @@ class vector
 
 		// Modifiers
 		template <class InputIterator>
-		void assign (InputIterator first, InputIterator last)
+		void assign (InputIterator first, typename enable_if<!is_integral<InputIterator>::value_type, InputIterator>::type last)
 		{
 			clear();
 			for (; first != last; first++) {
@@ -259,7 +278,10 @@ class vector
 		void pop_back()
 		{
 			if (!empty())
+			{
 				_size--;
+				_allocator.destroy(_data + _size);
+			}
 		}
 
 		iterator insert (iterator pos, const value_type &val)
@@ -289,6 +311,7 @@ class vector
 		{
 			while (first != last) {
 				pos = insert(pos, *first);
+				pos = pos + 1;
 				first++;
 			}
 		}
@@ -301,7 +324,7 @@ class vector
 				return (end());
 			}
 			
-			size_t	dist	= std::distance(position, end());
+			size_t	dist	= std::distance(position, end() - 1);
 
 			if (!dist)
 				return position;
@@ -325,20 +348,29 @@ class vector
 			}
 			
 			size_t	dist	= std::distance(position, last);
-
 			if (!dist)
 				return position;
-
-			while (position != last)
+			//dont give a shit and delete position to last)
+			// shift the next stuff till end() position - last addresses back
+			int offset = 0;
+			while (position != end())
 			{
-				_allocator.destroy(&(*position));
-				if (last == position + 1)
-					break;
-				_allocator.construct(&(*position), *(++position));
+				if (position < last)
+				{
+					_allocator.destroy(&(*position));
+					// if (last == position + 1)
+					// 	break;
+					_allocator.construct(&(*position), *(position++ + dist));
+				}
+				else
+				{
+					offset++;
+					_allocator.construct(&(*position), *(position++ + dist));
+				}
 			}
 			_size = _size - dist;
 			_allocator.destroy(_data + _size);
-			return (position - dist);
+			return ((position - offset) - dist);
 		}
 
 		void swap(vector &other)
@@ -350,9 +382,8 @@ class vector
 
 		void clear()
 		{
-			delete[] _data;
-			_size = 0;
-			_data = _allocator.allocate(_capacity);
+			while (_size > 0)
+				pop_back();
 		}
 
 		//Non member function overloads
@@ -384,20 +415,32 @@ class vector
 		}
 
 		template <class _Tp, class _Alloc>
-		friend bool operator<(const vector<_Tp, _Alloc> &rhs,
-								const vector<_Tp, _Alloc> &lhs);
+		friend bool operator<(const vector<_Tp, _Alloc> &lhs,
+								const vector<_Tp, _Alloc> &rhs)
+		{
+			return (std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
+		}
 		
 		template <class _Tp, class _Alloc>
-		friend bool operator<=(const vector<_Tp, _Alloc> &rhs,
-								const vector<_Tp, _Alloc> &lhs);
+		friend bool operator<=(const vector<_Tp, _Alloc> &lhs,
+								const vector<_Tp, _Alloc> &rhs)
+		{
+			return (std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()) || lhs == rhs);
+		}
 
 		template <class _Tp, class _Alloc>
-		friend bool operator>(const vector<_Tp, _Alloc> &rhs,
-								const vector<_Tp, _Alloc> &lhs);
+		friend bool operator>(const vector<_Tp, _Alloc> &lhs,
+								const vector<_Tp, _Alloc> &rhs)
+		{
+			return (rhs < lhs);
+		}
 
 		template <class _Tp, class _Alloc>
-		friend bool operator>=(const vector<_Tp, _Alloc> &rhs,
-								const vector<_Tp, _Alloc> &lhs);
+		friend bool operator>=(const vector<_Tp, _Alloc> &lhs,
+								const vector<_Tp, _Alloc> &rhs)
+		{
+			return (!(lhs < rhs));
+		}
 
 	private:
 		void Alloc(size_t initCapacity)
@@ -425,14 +468,7 @@ class vector
 			_data = newBlock;
 			_capacity = newCapacity;
 		}
-
-	private:
-		allocator_type _allocator;
-		pointer _data;
-		size_t _size;
-		size_t _capacity;
-
-
+		
 };
 
 }

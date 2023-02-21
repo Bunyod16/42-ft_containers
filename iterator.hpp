@@ -167,84 +167,6 @@ ft::pair<A, B> make_pair( A t, B u )
 }
 
 template <typename T>
-class VecRevIterator : public std::iterator<std::random_access_iterator_tag, T>
-{
-	public:
-		typedef T iterator_type;
-		typedef typename ft::iterator_traits<T>::iterator_category iterator_category;
-	    typedef typename ft::iterator_traits<T>::value_type value_type;
-	    typedef typename ft::iterator_traits<T>::difference_type difference_type;
-	    typedef typename ft::iterator_traits<T>::pointer pointer;
-	    typedef typename ft::iterator_traits<T>::reference reference;
-
-	    // constructor
-	    VecRevIterator() : _ptr(nullptr) {};
-
-		iterator_type base(void) const
-		{
-			return _ptr;
-		}
-
-		explicit VecRevIterator( iterator_type x) : _ptr(x) {}
-		
-		template<class U>
-		VecRevIterator(const VecRevIterator<U> &other) : _ptr(other.base()) {}
-
-		~VecRevIterator() {}
-	    // increment/decrement operators
-	    VecRevIterator& operator++() { --_ptr; return *this; }
-	    VecRevIterator& operator--() { ++_ptr; return *this; }
-	    VecRevIterator operator++(int) { VecRevIterator tmp(*this); operator++(); return tmp; }
-	    VecRevIterator operator--(int) { VecRevIterator tmp(*this); operator--(); return tmp; }
-
-	    // arithmetic operators
-	    VecRevIterator operator+(difference_type n) const { return VecRevIterator(_ptr + n); }
-	    VecRevIterator operator-(difference_type n) const { return VecRevIterator(_ptr - n); }
-	    difference_type operator-(const VecRevIterator& rhs) const { return _ptr - rhs._ptr; }
-	    VecRevIterator& operator+=(difference_type n) { _ptr += n; return *this; }
-	    VecRevIterator& operator-=(difference_type n) { _ptr -= n; return *this; }
-
-	    // dereference operator
-	    reference operator*() const
-		{
-			iterator_type temp = _ptr;
-
-			return *(--temp);
-		}
-
-	    pointer operator->() const
-		{
-			return &(operator*());
-		}
-
-	    T& operator[](difference_type n) const { return _ptr[n]; }
-
-	    // comparison operators
-	    bool operator==(const VecRevIterator& rhs) const { return _ptr == rhs._ptr; }
-	    bool operator!=(const VecRevIterator& rhs) const { return _ptr != rhs._ptr; }
-	    bool operator<(const VecRevIterator& rhs) const { return _ptr < rhs._ptr; }
-	    bool operator>(const VecRevIterator& rhs) const { return _ptr > rhs._ptr; }
-	    bool operator<=(const VecRevIterator& rhs) const { return _ptr <= rhs._ptr; }
-		bool operator>=(const VecRevIterator& rhs) const { return _ptr >= rhs._ptr; }
-
-	private:
-		iterator_type _ptr;
-};
-
-template <class Iter1, class Iter2>
-bool operator==(const VecRevIterator<Iter1> &lhs, const VecRevIterator<Iter2> &rhs)
-{
-	return (lhs.base() == rhs.base());
-}
-
-template <class Iter1, class Iter2>
-bool operator!=(const VecRevIterator<Iter1> &lhs, const VecRevIterator<Iter2> &rhs)
-{
-	return (lhs.base() != rhs.base());
-}
-
-
-template <typename T>
 class VecIterator : public std::iterator<std::random_access_iterator_tag, T>
 {
 	public:
@@ -253,10 +175,27 @@ class VecIterator : public std::iterator<std::random_access_iterator_tag, T>
 	    typedef std::ptrdiff_t difference_type;
 		typedef T* pointer;
 		typedef T& reference;
+		typedef const T& const_reference;
 
 	    // constructor
+		pointer base() const
+		{
+			return _ptr;
+		}
+
+	    VecIterator() : _ptr(nullptr) {}
+		VecIterator(const VecIterator<typename std::remove_const<value_type>::type> &other) : _ptr(other._ptr) {}
 	    VecIterator(pointer p) : _ptr(p) {}
 
+
+
+        VecIterator<value_type>	&operator=(VecIterator<typename std::remove_const<value_type>::type> const &other)
+		{
+			this->_ptr = other._ptr	;
+			return (*this);
+		}
+
+		~VecIterator () {}
 	    // increment/decrement operators
 	    VecIterator& operator++() { ++_ptr; return *this; }
 	    VecIterator& operator--() { --_ptr; return *this; }
@@ -283,9 +222,144 @@ class VecIterator : public std::iterator<std::random_access_iterator_tag, T>
 	    bool operator<=(const VecIterator& rhs) const { return _ptr <= rhs._ptr; }
 		bool operator>=(const VecIterator& rhs) const { return _ptr >= rhs._ptr; }
 
-	private:
 		T* _ptr;
 };
+
+template <class T>
+VecIterator<T> operator+(typename VecIterator<T>::difference_type n, const VecIterator<T> &other)
+{
+	return (other + n);
+}
+
+template <class T>
+VecIterator<T> operator-(typename VecIterator<T>::difference_type n, const VecIterator<T> &other)
+{
+	return (other - n);
+}
+
+template <class T, class U>
+bool	operator==(const VecIterator<T> & lhs, const VecIterator<U> & rhs)
+{
+	return (lhs._ptr == rhs._ptr);
+}
+
+template <class T, class U>
+bool	operator!=(const VecIterator<T> & lhs, const VecIterator<U> & rhs)
+{
+	return (lhs._ptr != rhs._ptr);
+}
+
+template <class T, class U>
+bool	operator<(const VecIterator<T> & lhs, const VecIterator<U> & rhs)
+{
+	return (lhs._ptr < rhs._ptr);
+}
+
+template <class T, class U>
+bool	operator<=(const VecIterator<T> & lhs, const VecIterator<U> & rhs)
+{
+	return (lhs._ptr <= rhs._ptr);
+}
+
+template <class T, class U>
+bool	operator>(const VecIterator<T> & lhs, const VecIterator<U> & rhs)
+{
+	return (lhs._ptr > rhs._ptr);
+}
+
+template <class T, class U>
+bool	operator>=(const VecIterator<T> & lhs, const VecIterator<U> & rhs)
+{
+	return (lhs._ptr >= rhs._ptr);
+}
+
+template <typename T>
+class VecRevIterator : public std::iterator<std::random_access_iterator_tag, T>
+{
+	public:
+		typedef T iterator_type;
+		typedef typename ft::iterator_traits<T>::iterator_category iterator_category;
+	    typedef typename ft::iterator_traits<T>::value_type value_type;
+	    typedef typename ft::iterator_traits<T>::difference_type difference_type;
+	    typedef typename ft::iterator_traits<T>::pointer pointer;
+	    typedef typename ft::iterator_traits<T>::reference reference;
+
+	    // constructor
+		iterator_type _ptr;
+
+		iterator_type base(void) const
+		{
+			return _ptr;
+		}
+
+	    VecRevIterator() : _ptr(nullptr) {}
+
+		explicit VecRevIterator( iterator_type x) : _ptr(x) {}
+		
+		template<class U>
+		VecRevIterator(const VecRevIterator<U> &other) : _ptr(other.base()) {}
+
+		VecRevIterator	&operator=(const VecRevIterator &other)
+		{
+			_ptr = other._ptr;
+			return (*this);
+		}
+
+		~VecRevIterator() {}
+	    // increment/decrement operators
+	    VecRevIterator& operator++() { --_ptr; return *this; }
+	    VecRevIterator& operator--() { ++_ptr; return *this; }
+	    VecRevIterator operator++(int) { VecRevIterator tmp(*this); --_ptr(); return tmp; }
+	    VecRevIterator operator--(int) { VecRevIterator tmp(*this); ++_ptr(); return tmp; }
+
+	    // arithmetic operators
+	    VecRevIterator operator+(difference_type n) const { return VecRevIterator(_ptr + n); }
+	    // VecRevIterator operator+(int n) const
+		// {
+		// 	VecRevIterator result = *this;
+        // 	result += n;
+        // 	return result;
+		// }
+	    VecRevIterator operator-(difference_type n) const { return VecRevIterator(_ptr + n); }
+	    // difference_type operator-(const VecRevIterator& rhs) const { return _ptr - rhs._ptr; }
+	    VecRevIterator& operator+=(difference_type n) { _ptr -= n; return *this; }
+	    VecRevIterator& operator-=(difference_type n) { _ptr += n; return *this; }
+
+	    // dereference operator
+	    reference operator*() const
+		{
+			iterator_type temp = _ptr;
+
+			return *(--temp);
+		}
+
+	    pointer operator->() const
+		{
+			return &(operator*());
+		}
+
+	    reference operator[](difference_type n) const
+		{
+			iterator_type temp = _ptr;
+
+			return *(--temp - n);
+		}
+
+	    // comparison operators
+	    bool operator==(const VecRevIterator& rhs) const { return _ptr == rhs._ptr; }
+	    bool operator!=(const VecRevIterator& rhs) const { return _ptr != rhs._ptr; }
+	    bool operator<(const VecRevIterator& rhs) const { return _ptr < rhs._ptr; }
+	    bool operator>(const VecRevIterator& rhs) const { return _ptr > rhs._ptr; }
+	    bool operator<=(const VecRevIterator& rhs) const { return _ptr <= rhs._ptr; }
+		bool operator>=(const VecRevIterator& rhs) const { return _ptr >= rhs._ptr; }
+
+};
+
+template <class Iter>
+VecRevIterator<Iter> operator+(typename VecRevIterator<Iter>::difference_type n, const VecRevIterator<Iter> &other)
+{
+	return (other + n);
+}
 
 template <class T>
 struct Node {
