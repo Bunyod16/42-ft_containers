@@ -67,7 +67,8 @@ class map
 			{
 				while (first != last)
 				{
-					_rbt.insert(*first);
+					if (_rbt.find_val(_rbt.get_root(), *first) == _rbt.get_sentinal())
+						_rbt.insert(*first);
 					first++;
 				}
 			}
@@ -399,7 +400,7 @@ class map
 		bool operator<( const ft::map<K,V,Comp,Alloc>& lhs,
 						const ft::map<K,V,Comp,Alloc>& rhs )
 		{
-			return (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
+			return (std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
 		} //lb le rb re
 
 		template< class K, class V, class Comp, class Alloc >

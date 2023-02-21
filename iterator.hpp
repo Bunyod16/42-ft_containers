@@ -116,8 +116,8 @@ class pair
 
 	pair & operator=(const pair & pr)
 	{
-		first = pr.first;
-		second = pr.second;
+		this->first = pr.first;
+		this->second = pr.second;
 		return (*this);
 	}
 };
@@ -125,19 +125,21 @@ class pair
 template <class A, class B>
 bool operator==( const pair<A, B>& lhs, const pair<A, B>& rhs )
 {
-	return (lhs.first == rhs.first && lhs.second == rhs.second);
+	return ((lhs.first == rhs.first) && (lhs.second == rhs.second));
 }
 
 template <class A, class B>
 bool operator!=( const pair<A, B>& lhs, const pair<A, B>& rhs )
 {
-	return (lhs.first != rhs.first && lhs.second != rhs.second);
+	return (lhs.first != rhs.first || lhs.second != rhs.second);
+	// return (!(lhs == rhs));
 }
 
 template <class A, class B>
 bool operator<( const pair<A, B>& lhs, const pair<A, B>& rhs )
 {
-	return (lhs.first < rhs.first || (lhs.first < rhs.first && lhs.second < rhs.second));
+	return (lhs.first < rhs.first || 
+		(lhs.second < rhs.second));
 }
 
 template <class A, class B>
