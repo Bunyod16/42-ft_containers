@@ -107,6 +107,7 @@ public:
 			insert(*it);
 			it++;
 		}
+		_size = other.size();
 		// std::cout << "RAN " << _root->_is_sentinal << std::endl;
 	}
 

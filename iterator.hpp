@@ -6,7 +6,8 @@
 
 namespace ft
 {
-
+// where inheritance u put?
+// its not really inheritance, its template parameters
 template <typename Iterator>
 class iterator_traits
 {
@@ -215,26 +216,41 @@ class VecIterator : public std::iterator<std::random_access_iterator_tag, T>
 	    T& operator[](difference_type n) const { return _ptr[n]; }
 
 	    // comparison operators
-	    bool operator==(const VecIterator& rhs) const { return _ptr == rhs._ptr; }
-	    bool operator!=(const VecIterator& rhs) const { return _ptr != rhs._ptr; }
-	    bool operator<(const VecIterator& rhs) const { return _ptr < rhs._ptr; }
-	    bool operator>(const VecIterator& rhs) const { return _ptr > rhs._ptr; }
-	    bool operator<=(const VecIterator& rhs) const { return _ptr <= rhs._ptr; }
-		bool operator>=(const VecIterator& rhs) const { return _ptr >= rhs._ptr; }
+	    // bool operator==(const VecIterator& rhs) const { return _ptr == rhs._ptr; }
+	    // bool operator!=(const VecIterator& rhs) const { return _ptr != rhs._ptr; }
+	    // bool operator<(const VecIterator& rhs) const { return _ptr < rhs._ptr; }
+	    // bool operator>(const VecIterator& rhs) const { return _ptr > rhs._ptr; }
+	    // bool operator<=(const VecIterator& rhs) const { return _ptr <= rhs._ptr; }
+		// bool operator>=(const VecIterator& rhs) const { return _ptr >= rhs._ptr; }
 
 		T* _ptr;
 };
 
+// template <class T>
+// VecIterator<T> operator+(typename VecIterator<T>::difference_type n, const VecIterator<T> &other)
+// {
+// 	return (other + n);
+// }
+
+// template <class T>
+// VecIterator<T> operator-(typename VecIterator<T>::difference_type n, const VecIterator<T> &other)
+// {
+// 	return (other - n);
+// }
+
 template <class T>
-VecIterator<T> operator+(typename VecIterator<T>::difference_type n, const VecIterator<T> &other)
+VecIterator<T> operator+(typename VecIterator<T>::difference_type n,
+								const VecIterator<T> &other)
 {
 	return (other + n);
 }
 
-template <class T>
-VecIterator<T> operator-(typename VecIterator<T>::difference_type n, const VecIterator<T> &other)
+template <class T, class U>
+typename VecIterator<T>::difference_type
+	operator-(const VecIterator<U> &lhs,
+			const VecIterator<T> &rhs)
 {
-	return (other - n);
+	return (lhs.base() - rhs.base());
 }
 
 template <class T, class U>
@@ -273,7 +289,7 @@ bool	operator>=(const VecIterator<T> & lhs, const VecIterator<U> & rhs)
 	return (lhs._ptr >= rhs._ptr);
 }
 
-template <typename T>
+template <typename T> //this T is an iterator for const_reverse_iterator version? then it is T<const int>
 class VecRevIterator : public std::iterator<std::random_access_iterator_tag, T>
 {
 	public:
@@ -294,35 +310,44 @@ class VecRevIterator : public std::iterator<std::random_access_iterator_tag, T>
 
 	    VecRevIterator() : _ptr(nullptr) {}
 
-		explicit VecRevIterator( iterator_type x) : _ptr(x) {}
+		explicit VecRevIterator( iterator_type x) : _ptr(x) {
+		}
 		
 		template<class U>
-		VecRevIterator(const VecRevIterator<U> &other) : _ptr(other.base()) {}
+		VecRevIterator(const VecRevIterator<U> &other) : _ptr(other.base()) {
+		}
 
 		VecRevIterator	&operator=(const VecRevIterator &other)
 		{
 			_ptr = other._ptr;
 			return (*this);
-		}
+		}// it cannot match a constructor , that;s the issue VecRevIterator<VecIterator<const int> > || VecRevIterator<VecIterator<int> >
 
 		~VecRevIterator() {}
 	    // increment/decrement operators
 	    VecRevIterator& operator++() { --_ptr; return *this; }
 	    VecRevIterator& operator--() { ++_ptr; return *this; }
-	    VecRevIterator operator++(int) { VecRevIterator tmp(*this); --_ptr(); return tmp; }
-	    VecRevIterator operator--(int) { VecRevIterator tmp(*this); ++_ptr(); return tmp; }
+	    VecRevIterator operator++(int) { VecRevIterator tmp(*this); --_ptr; return tmp; }
+	    VecRevIterator operator--(int) { VecRevIterator tmp(*this); ++_ptr; return tmp; }
 
 	    // arithmetic operators
-	    VecRevIterator operator+(difference_type n) const { return VecRevIterator(_ptr + n); }
+	    VecRevIterator operator+(difference_type n) const { return VecRevIterator(_ptr - n); }
 	    // VecRevIterator operator+(int n) const
 		// {
 		// 	VecRevIterator result = *this;
         // 	result += n;
         // 	return result;
 		// }
-	    VecRevIterator operator-(difference_type n) const { return VecRevIterator(_ptr + n); }
-	    // difference_type operator-(const VecRevIterator& rhs) const { return _ptr - rhs._ptr; }
-	    VecRevIterator& operator+=(difference_type n) { _ptr -= n; return *this; }
+		// i think need a way for this to include
+	    // VecRevIterator operator-(const VecRevIterator n) const { return VecRevIterator(_ptr + n); }
+		// 
+	    VecRevIterator operator-(difference_type n) const { return VecRevIterator(_ptr + n); } // difference_type is not rev vector, hence - not recoginx
+ 
+		// template<class U>
+	    // VecRevIterator<U> operator-(const VecRevIterator<U> n) { return VecRevIterator(_ptr - n); }
+
+	    difference_type operator-(const VecRevIterator& rhs) const { return (_ptr + rhs._ptr); }
+	    VecRevIterator& operator+=(difference_type n) {_ptr -= n; return *this; }
 	    VecRevIterator& operator-=(difference_type n) { _ptr += n; return *this; }
 
 	    // dereference operator
@@ -333,6 +358,9 @@ class VecRevIterator : public std::iterator<std::random_access_iterator_tag, T>
 			return *(--temp);
 		}
 
+		// if this is const_reverse_iterator, the pointer should be const_pointer, not really right
+		// since the underlying template is another iterator
+		// this pointer value return can be change right?
 	    pointer operator->() const
 		{
 			return &(operator*());
@@ -346,19 +374,75 @@ class VecRevIterator : public std::iterator<std::random_access_iterator_tag, T>
 		}
 
 	    // comparison operators
-	    bool operator==(const VecRevIterator& rhs) const { return _ptr == rhs._ptr; }
-	    bool operator!=(const VecRevIterator& rhs) const { return _ptr != rhs._ptr; }
-	    bool operator<(const VecRevIterator& rhs) const { return _ptr < rhs._ptr; }
-	    bool operator>(const VecRevIterator& rhs) const { return _ptr > rhs._ptr; }
-	    bool operator<=(const VecRevIterator& rhs) const { return _ptr <= rhs._ptr; }
-		bool operator>=(const VecRevIterator& rhs) const { return _ptr >= rhs._ptr; }
+	    // bool operator==(const VecRevIterator& rhs) const { return _ptr == rhs._ptr; }
+	    // bool operator!=(const VecRevIterator& rhs) const { return _ptr != rhs._ptr; }
+	    // bool operator<(const VecRevIterator& rhs) const { return _ptr < rhs._ptr; }
+	    // bool operator>(const VecRevIterator& rhs) const { return _ptr > rhs._ptr; }
+	    // bool operator<=(const VecRevIterator& rhs) const { return _ptr <= rhs._ptr; }
+		// bool operator>=(const VecRevIterator& rhs) const { return _ptr >= rhs._ptr; }
 
 };
 
-template <class Iter>
-VecRevIterator<Iter> operator+(typename VecRevIterator<Iter>::difference_type n, const VecRevIterator<Iter> &other)
+template <class Iter1, class Iter2>
+bool operator!=(const VecRevIterator<Iter1> &lhs, const VecRevIterator<Iter2> &rhs)
 {
-	return (other + n);
+	return (lhs.base() != rhs.base());
+}
+
+template <class Iter1, class Iter2>
+bool operator==(const VecRevIterator<Iter1> &lhs, const VecRevIterator<Iter2> &rhs)
+{
+	return (lhs.base() == rhs.base());
+}
+
+template <class Iter1, class Iter2>
+bool operator<(const VecRevIterator<Iter1> &lhs, const VecRevIterator<Iter2> &rhs)
+{
+	return (lhs.base() > rhs.base());
+}
+
+template <class Iter1, class Iter2>
+bool operator<=(const VecRevIterator<Iter1> &lhs, const VecRevIterator<Iter2> &rhs)
+{
+	return (lhs.base() >= rhs.base());
+}
+
+template <class Iter1, class Iter2>
+bool operator>(const VecRevIterator<Iter1> &lhs, const VecRevIterator<Iter2> &rhs)
+{
+	return (lhs.base() < rhs.base());
+}
+
+template <class Iter1, class Iter2>
+bool operator>=(const VecRevIterator<Iter1> &lhs, const VecRevIterator<Iter2> &rhs)
+{
+	return (lhs.base() <= rhs.base());
+}
+// template <class T>
+// VecRevIterator<T> operator+(typename VecRevIterator<T>::difference_type n, const VecRevIterator<T> &other)
+// {
+// 	return (other + n);
+// }
+// // i think it should be this overload right
+// template <class T>
+// VecRevIterator<T> operator-(typename VecRevIterator<T>::difference_type n, const VecRevIterator<T> &other)
+// {
+// 	return (other - n);
+// }
+
+template <class Iter>
+	VecRevIterator<Iter>
+		operator+(typename VecRevIterator<Iter>::difference_type n,
+			const VecRevIterator<Iter> &other)
+	{
+		return (other + n);
+	}
+
+template <class Iter1, class Iter2> 
+typename VecRevIterator<Iter1>::difference_type
+	operator-(const VecRevIterator<Iter1> &lhs, const VecRevIterator<Iter2> &rhs)
+{
+	return (rhs.base() - lhs.base());
 }
 
 template <class T>

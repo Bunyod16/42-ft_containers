@@ -29,7 +29,8 @@ class vector
 		typedef VecIterator<const value_type>				const_iterator;
 		typedef VecRevIterator<iterator>					reverse_iterator;
 		typedef VecRevIterator<const_iterator>				const_reverse_iterator;
-
+		// is yours different?
+		//yes as i creating class iterator twice without using inheritance.
 		typedef std::size_t										size_type;
 		typedef std::ptrdiff_t									difference_type;
 	
@@ -69,6 +70,10 @@ class vector
 
 		reverse_iterator rbegin()
 		{
+			// both is using this. 
+			// reverse_iterator become const_reverse_iterator.
+			//begin() give vectoriter trigger
+			// then construvt rev_iterator will output both vectoriter triggrr & triggered 2
 			return (reverse_iterator(begin() + _size));
 		}
 		

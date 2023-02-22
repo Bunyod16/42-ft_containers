@@ -14,24 +14,26 @@ MAPTEST = m
 all: $(NAME)
 
 $(NAME): $(OBJECTS)
-	$(CC) -fsanitize=address -g3 -o $@ $^
+	$(CC) -g3 -o $@ $^
 
 $(VECTORTEST)ft: clean
 	$(CC) -c $(CFLAGS) $(TESTDIR)/vector.cpp -DNAME_SPACE=ft 
-	$(CC) $(CFLAGS) -fsanitize=address -DNAME_SPACE=ft $(TESTDIR)/vector.cpp -g3 -o $@ 
+	$(CC) $(CFLAGS) -DNAME_SPACE=ft $(TESTDIR)/vector.cpp -g3 -o $@ 
+	./$(VECTORTEST)ft
 
 $(VECTORTEST)std: clean
 	$(CC) -c $(CFLAGS) $(TESTDIR)/vector.cpp -DNAME_SPACE=std
-	$(CC) $(CFLAGS) -fsanitize=address -DNAME_SPACE=std $(TESTDIR)/vector.cpp -g3 -o $@
+	$(CC) $(CFLAGS) -DNAME_SPACE=std $(TESTDIR)/vector.cpp -g3 -o $@
+	./$(VECTORTEST)std
 
 $(MAPTEST)ft: clean
 	$(CC) -c $(CFLAGS) $(TESTDIR)/map.cpp -DNAME_SPACE=ft 
-	$(CC) $(CFLAGS) -fsanitize=address -DNAME_SPACE=ft $(TESTDIR)/map.cpp -g3 -o $@
+	$(CC) $(CFLAGS) -DNAME_SPACE=ft $(TESTDIR)/map.cpp -g3 -o $@
 	./$(MAPTEST)ft
 
 $(MAPTEST)std: clean
 	$(CC) -c $(CFLAGS) $(TESTDIR)/map.cpp -DNAME_SPACE=std
-	$(CC) $(CFLAGS) -fsanitize=address -DNAME_SPACE=std $(TESTDIR)/map.cpp -g3 -o $@ 
+	$(CC) $(CFLAGS) -DNAME_SPACE=std $(TESTDIR)/map.cpp -g3 -o $@ 
 	./$(MAPTEST)std
 
 %.o: %.cpp

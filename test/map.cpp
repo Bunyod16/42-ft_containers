@@ -466,24 +466,29 @@ TEST_CASE("Test find") {
     CHECK(const_it == map.end());
 }
 
-TEST_CASE("Test lower bound")
+std::string RandomString(int ch)
 {
-    {
-        // NAME_SPACE::map<int, char> mymap;
-        // // NAME_SPACE::map<char,int>::iterator itlow;
-
-        // mymap.insert(NAME_SPACE::make_pair(20, 'a'));
-        // mymap.insert(NAME_SPACE::make_pair(40, 'b'));
-        // mymap.insert(NAME_SPACE::make_pair(60, 'c'));
-
-        // // itlow = mymap.lower_bound('b');  // itlow points to b
-
-        // mymap.erase(40);
-    }    // erases [itlow,itup) //TODO figure out why tf doesnt work
-    // CHECK(mymap.size() == 5);
-    // CHECK(mymap['b'] != 60);
-    // itlow = mymap.lower_bound('f');  // itlow points to b
-    // CHECK(itlow->first == 'g'); // because f cannot be found, its returning the only key that is higher than it
-    // itlow = mymap.lower_bound('z');  // itlow points to b
-    // CHECK(itlow->first == 'g'); // because f cannot be found, its returning the only key that is higher than it
+    char alpha[26] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+                          'h', 'i', 'j', 'k', 'l', 'm', 'n',
+                          'o', 'p', 'q', 'r', 's', 't', 'u',
+                          'v', 'w', 'x', 'y', 'z' };
+    std::string result = "";
+    for (int i = 0; i<ch; i++)
+        result = result + alpha[rand() % 26];
+    return result;
 }
+
+// TEST_CASE("Test insanity")
+// {
+    
+
+//     NAME_SPACE::map<std::string, int> map;
+//     for (int x = 0; x < 100000; x++)
+//     {
+//         srand(time(NULL));
+//         map.insert(NAME_SPACE::make_pair(RandomString(100), 15));
+//     }
+//     map.clear();
+//     CHECK(map.size() == 0);
+    
+// }
