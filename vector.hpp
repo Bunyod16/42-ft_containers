@@ -363,8 +363,8 @@ class vector
 				if (position < last)
 				{
 					_allocator.destroy(&(*position));
-					// if (last == position + 1)
-					// 	break;
+					// if (end() == position + 1)
+						// break; // allocate more space if need to move more
 					_allocator.construct(&(*position), *(position++ + dist));
 				}
 				else
